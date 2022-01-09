@@ -40,7 +40,6 @@ def best_ma_strategy(symbol, freq, res_dir, flag_filter):
 @click.option('--symbol', '-s', type=str, default=None, help='asset name, e.g., BTCUSDT')
 @click.option('--date', '-d', type=str, help='the date when the results are generated')
 @click.option('--res_dir', '-r', required=True, type=str, help='directory for outputs')
-# @click.option('--name', '-n', required=True, type=str, help='the name of the MA strategy')
 @click.option('--flag_filter', '-g', type=str, default=None, show_default=True, help='flag to use, mmi | mmi_ge | ang')
 def check_ma_indicators(symbol, date, res_dir, flag_filter, ):
     parts = res_dir.split('-')
@@ -48,8 +47,6 @@ def check_ma_indicators(symbol, date, res_dir, flag_filter, ):
         raise(ValueError('Mismatch found in filter setting and output dir'))
     if not 'ma' in parts:
         raise(ValueError('Make sure the res_dir is for MA strategy'))
-    # if not name:
-    #     raise(ValueError('The name of the strategy is required'))
     if symbol:
         symbols = [symbol]
     else:
