@@ -1,4 +1,8 @@
+'''
+The code from finlab folder is originally from https://github.com/finlab-python/finlab_crypto 
+''' 
 import vectorbt as vbt
+
 
 # set default fees and slippage
 vbt.settings.portfolio['init_cash'] = 100.0 # in $

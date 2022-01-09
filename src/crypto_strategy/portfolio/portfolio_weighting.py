@@ -1,5 +1,5 @@
-from crypto_strategy.bo_strategy import InspectBoStrategy
-from crypto_strategy.ma_strategy import InspectMaStrategy
+from crypto_strategy.strategies.bo_strategy import InspectBoStrategy
+from crypto_strategy.strategies.ma_strategy import InspectMaStrategy
 
 def calc_kelly_criterion(stats):
     # winning probability

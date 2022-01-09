@@ -4,11 +4,10 @@ from datetime import datetime
 import pandas as pd
 import seaborn as sns
 import numpy as np
-from .data import join_path
-from .data import download_crypto_history
+from crypto_strategy.data import join_path
+from crypto_strategy.plot import plot_returns
+from crypto_strategy.strategies.bo_strategy import returns_timeline
 from .reporting_base import GenerateReport, generate_cscv
-from .plot import plot_returns
-from .bo_strategy import returns_timeline
 
 
 class GenerateMaReport(GenerateReport):

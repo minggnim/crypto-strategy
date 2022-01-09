@@ -1,7 +1,7 @@
 import click
-from crypto_strategy.ma_strategy import BestMaStrategy, CheckMaIndicators
-from crypto_strategy.bo_strategy import BestBoStrategy, CheckBoIndicators
-from crypto_strategy.reporting import generate_report as _generate_report
+from crypto_strategy.strategies.ma_strategy import BestMaStrategy, CheckMaIndicators
+from crypto_strategy.strategies.bo_strategy import BestBoStrategy, CheckBoIndicators
+from crypto_strategy.reporting.report import generate_report as _generate_report
 
 
 SYMBOLS = [

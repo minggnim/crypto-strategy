@@ -4,8 +4,8 @@ from datetime import datetime
 from abc import ABC, abstractmethod
 import numpy as np
 import pandas as pd
-from .plot import plot_indicators
-from .data import check_and_create_dir, download_crypto_history
+from crypto_strategy.plot import plot_indicators
+from crypto_strategy.data import check_and_create_dir, download_crypto_history
 
 
 class BestStrategy(ABC):
