@@ -8,7 +8,7 @@ A repo to create trading strategies for cryptocurrencies.
 
 ## Install
 
-pip install -e .[cli,utils]
+pip install -e .[full]
 
 ## Usage
 
