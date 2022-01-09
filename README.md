@@ -1,4 +1,5 @@
 # crypto-strategy
+[![upload-python-package](https://github.com/minggnim/crypto-strategy/actions/workflows/python-publish.yml/badge.svg?branch=master)](https://github.com/minggnim/crypto-strategy/actions/workflows/python-publish.yml)
 
 ![](./img/algo-trading.png)
 
