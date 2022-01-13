@@ -113,7 +113,7 @@ def stop_early(ohlcv, entries, exits, stop_vars, enumeration=True):
         stop_vars = enumerate_variables(stop_vars)
         stop_vars = {key: [stop_vars[i][key] for i in range(len(stop_vars))] for key in stop_vars[0].keys()}
 
-    sl_advstex = vbt.ADVSTEX.run(
+    sl_advstex = vbt.OHLCSTX.run(
         entries,
         ohlcv['open'],
         ohlcv['high'],
