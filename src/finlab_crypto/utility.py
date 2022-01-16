@@ -56,7 +56,6 @@ def enumerate_variables(variables):
     return variable_enumerations
 
 
-
 def enumerate_signal(ohlcv, strategy, variables, ):
     entries = {}
     exits = {}
@@ -87,8 +86,16 @@ def enumerate_signal(ohlcv, strategy, variables, ):
         entries.columns = columns
     return entries, exits, fig
 
-def stop_early(ohlcv, entries, exits, stop_vars, enumeration=True):
 
+def migrate_trailing_stop(stop_vars):
+    # to support OHLCSTX upgrade
+    if 'ts_stop' in stop_vars:
+        stop_vars['sl_stop'] = stop_vars['ts_stop']
+        stop_vars['sl_trail'] = [s > 0 for s in stop_vars['ts_stop']]
+    return stop_vars
+
+
+def stop_early(ohlcv, entries, exits, stop_vars, enumeration=True):
     if not stop_vars:
         return entries, exits
 
@@ -113,17 +120,19 @@ def stop_early(ohlcv, entries, exits, stop_vars, enumeration=True):
         stop_vars = enumerate_variables(stop_vars)
         stop_vars = {key: [stop_vars[i][key] for i in range(len(stop_vars))] for key in stop_vars[0].keys()}
 
-    sl_advstex = vbt.OHLCSTX.run(
+    stop_vars = migrate_trailing_stop(stop_vars)
+
+    ohlcstx = vbt.OHLCSTX.run(
         entries,
         ohlcv['open'],
         ohlcv['high'],
         ohlcv['low'],
         ohlcv['close'],
-        stop_type=None,
-        **stop_vars
+        **stop_vars,
     )
+    stop_exits = ohlcstx.exits
 
-    stop_exits = sl_advstex.exits
+    # import pdb; pdb.set_trace()
 
     nrepeat = int(len(stop_exits.columns) / len(entries.columns))
     if isinstance(stop_exits, pd.DataFrame):
