@@ -3,20 +3,12 @@ import pathlib
 import numpy as np
 import pandas as pd
 from datetime import datetime
-from finlab_crypto.indicators import trends
-from finlab_crypto.strategy import Strategy, Filter
 from crypto_strategy.data import download_crypto_history, save_stats
 from .base import (
-    macd_strategy, 
-    macd_strategy_revised, 
-    mmi_filter, 
-    mmi_filter_ge_half, 
-    ang_filter, 
-    stoch_filter, 
-    sma_filter, 
-    BestStrategy, 
-    InspectStrategy, 
-    CheckIndicators
+    macd_strategy, macd_strategy_revised, 
+    mmi_filter, mmi_filter_ge_half, 
+    ang_filter, stoch_filter, sma_filter, 
+    BestStrategy, InspectStrategy, CheckIndicators
 )
 
 RANGE_FASTPERIOD = np.arange(10, 200, 10)
@@ -48,22 +40,6 @@ def create_mmi_filter(flag_filter, **kwargs):
         )
     filters = {
         'mmi': mmi_filter.create({
-            'timeperiod': filter_config['timeperiod']
-        })
-    }
-    return filters
-
-def create_mmi_ge_filter(flag_filter, **kwargs):
-    if kwargs:
-        assert kwargs.get('timeperiod'),\
-            'mmi_ge fitler doesn\'t have config params provided'
-        filter_config = kwargs
-    else:
-        filter_config = dict(
-            timeperiod = RANGE_TIMEPERIOD,
-        )
-    filters = {
-        'mmi_ge': mmi_filter_ge_half.create({
             'timeperiod': filter_config['timeperiod']
         })
     }
@@ -133,8 +109,6 @@ def get_filter(flag_filter, **kwargs):
     filters = dict()
     if flag_filter == 'mmi':
         filters = create_mmi_filter(flag_filter, **kwargs)
-    if flag_filter == 'mmi_ge':
-        filters = create_mmi_ge_filter(flag_filter, **kwargs)
     if flag_filter == 'ang':
         filters = create_ang_filter(flag_filter, **kwargs)
     if flag_filter == 'stoch':
@@ -160,7 +134,7 @@ class BestMacdStrategy(BestStrategy):
     symbols: a list of symbols to be optimzied on, e.g., ['BTCUSDT']
     freq: currently supported values are '1h' or '4h'
     res_dir: the output directory
-    flag_fitler: currently supported fitlers: 'mmi', 'mmi_ge', 'ang', 'stoch', 'sma', default: None
+    flag_fitler: currently supported fitlers: 'mmi', 'ang', 'stoch', 'sma', default: None
     trends: a list of MA strategies, default: trends.keys()
     strategy: currently supported strategies: 'macd', 'macd_rev', default: 'macd'
     '''
@@ -190,7 +164,7 @@ class BestMacdStrategy(BestStrategy):
         return total_best_params.tail(1).to_dict(orient='records')[0]
 
     def _get_grid_search(self):
-        if self.flag_filter in ('mmi', 'mmi_ge'):
+        if self.flag_filter == 'mmi':
             return self.grid_search_mmi_params()
         elif self.flag_filter == 'ang':
             return self.grid_search_ang_params()
@@ -252,8 +226,6 @@ class BestMacdStrategy(BestStrategy):
             )
         filters = self._get_filter(
             timeperiod = best_params.get('mmi_timeperiod') \
-                or best_params.get('mmi_timeperiod') \
-                or best_params.get('mmi_ge_timeperiod') \
                 or best_params.get('ang_timeperiod') \
                 or best_params.get('sma_timeperiod'),
             threshold = best_params.get('ang_threshold'),
@@ -264,8 +236,6 @@ class BestMacdStrategy(BestStrategy):
         filename = f"{symbol}-{self.freq}-{best_params['fastperiod']}-{best_params['slowperiod']}-{best_params['signalperiod']}-"
         if self.flag_filter == 'mmi':
             filename += f"{self.flag_filter}-{best_params['mmi_timeperiod']}-{self.date_str}.pkl"
-        elif self.flag_filter == 'mmi_ge':
-            filename += f"{self.flag_filter}-{best_params['mmi_ge_timeperiod']}-{self.date_str}.pkl"
         elif self.flag_filter == 'ang':
              filename += f"{self.flag_filter}-{best_params['ang_timeperiod']}-{best_params['ang_threshold']}-{self.date_str}.pkl"
         elif self.flag_filter == 'stoch':
@@ -291,11 +261,11 @@ class BestMacdStrategy(BestStrategy):
 class CheckMacdIndicators(CheckIndicators):
     '''
     This class provides the method to check Partial Differentiation 
-    and Combinatorially Symmetric Cross-validation of MA strategy
+    and Combinatorially Symmetric Cross-validation of MACD strategy
     symbols: a list of symbols to be optimzied on, e.g., ['BTCUSDT']
     date: the date the best params are created
     res_dir: the output directory
-    flag_fitler: currently supported fitlers: 'mmi', 'mmi_ge', default: None
+    flag_fitler: currently supported fitlers: 'mmi', 'ang', 'stoch', 'sma', default: None
     strategy: MACD strategy
     '''
     def __init__(self, symbols: list, date: str, res_dir: str,
@@ -319,9 +289,9 @@ class InspectMacdStrategy(InspectStrategy):
     This class provides a method to inspect the MA strategy with given params
     symbol: the name of the crypto, e.g., 'BTCUSDT'
     freq: currently supported values are '1h' or '4h'
-    name, n1, n2: the name and the params of the ma strategy, e.g., 'sma', 100, 50
-    timeperiod: the value of the timeperiod in either mmi or mmi_ge filter
-    flag_fitler: currently supported fitlers: 'mmi', 'mmi_ge', default: None
+    fastperiod, slowperiod, signalperiod: params of macd strategy
+    timeperiod, threshold, fast, slow: params used in filters
+    flag_fitler: currently supported fitlers: 'mmi', 'ang', 'stoch', 'sma', default: None
     '''
     def __init__(self, 
                 symbol: str, 

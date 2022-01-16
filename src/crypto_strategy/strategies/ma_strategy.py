@@ -8,11 +8,8 @@ from finlab_crypto.strategy import Strategy, Filter
 from crypto_strategy.data import download_crypto_history, save_stats
 from .base import (
     trend_strategy,
-    mmi_filter,
-    ang_filter,
-    BestStrategy, 
-    InspectStrategy, 
-    CheckIndicators
+    mmi_filter, ang_filter,
+    BestStrategy, InspectStrategy, CheckIndicators
 )
 
 
@@ -88,7 +85,7 @@ class BestMaStrategy(BestStrategy):
     symbols: a list of symbols to be optimzied on, e.g., ['BTCUSDT']
     freq: currently supported values are '1h' or '4h'
     res_dir: the output directory
-    flag_fitler: currently supported fitlers: 'mmi', 'mmi_ge', 'ang', default: None
+    flag_fitler: currently supported fitlers: 'mmi', 'ang', default: None
     trends: a list of MA strategies, default: trends.keys()
     strategy: strategy name, default: 'ma'
     '''
@@ -179,7 +176,7 @@ class CheckMaIndicators(CheckIndicators):
     date: the date the best params are created
     res_dir: the output directory
     name: the name of the MA strategy
-    flag_fitler: currently supported fitlers: 'mmi', 'mmi_ge', default: None
+    flag_fitler: currently supported fitlers: 'mmi', 'ang', default: None
     '''
     def __init__(self, symbols: list, date: str, res_dir: str,
                  flag_filter: str = None, strategy: str = 'ma'
@@ -203,8 +200,9 @@ class InspectMaStrategy(InspectStrategy):
     symbol: the name of the crypto, e.g., 'BTCUSDT'
     freq: currently supported values are '1h' or '4h'
     name, n1, n2: the name and the params of the ma strategy, e.g., 'sma', 100, 50
-    timeperiod: the value of the timeperiod in either mmi or mmi_ge filter
-    flag_fitler: currently supported fitlers: 'mmi', 'mmi_ge', default: None
+    timeperiod: param used in either mmi or ang filter
+    threshold: param used in ang filter
+    flag_fitler: currently supported fitlers: 'mmi', 'ang', default: None
     '''
     def __init__(self, 
                 symbol: str, freq: str, 

@@ -45,25 +45,6 @@ def breakout_strategy(ohlcv):
     }
     return entries, exits, figures
 
-@Strategy(long_window=30, short_window=30)
-def breakout_strategy_revised(ohlcv):
-    lw = breakout_strategy_revised.long_window
-    sw = breakout_strategy_revised.short_window    
-    ub = ohlcv.high.rolling(lw).max()
-    lb = ohlcv.low.rolling(sw).min()
-    # Break through new high to buy
-    entries = ohlcv.high >= ub
-    # Break through new low to sell
-    exits = ohlcv.low <= lb
-    figures = {
-        'overlaps': {
-            'ub': ub,
-            'lb': lb
-        }
-    }
-    return entries, exits, figures
-
-
 # macd strategy
 @Strategy(fastperiod=12, slowperiod=26, signalperiod=9)
 def macd_strategy(ohlcv):
