@@ -3,9 +3,11 @@ import numpy as np
 import pandas as pd
 from datetime import datetime
 from crypto_strategy.data import download_crypto_history, save_stats
-from .strategy_base import BestStrategy, InspectStrategy, CheckIndicators
-from .strategies import breakout_strategy, breakout_strategy_revised
-from .filters import vol_filter, ang_filter
+from .base import (
+    breakout_strategy,
+    vol_filter, ang_filter,
+    BestStrategy, InspectStrategy, CheckIndicators
+)
 
 
 RANGE_WINDOW = np.arange(10, 200, 5)
@@ -73,10 +75,8 @@ def get_filter(flag_filter, **kwargs):
 
 
 def get_strategy(strategy):
-    if strategy == 'bo_rev':
-        return breakout_strategy_revised
-    elif strategy == 'bo':
-        return breakout_strategy 
+    if strategy == 'bo':
+        return breakout_strategy
     else:
         raise ValueError('Strategy not recognized. Please choose from bo and bo_rev')
 

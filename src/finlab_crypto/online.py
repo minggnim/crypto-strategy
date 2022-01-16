@@ -1,14 +1,20 @@
 import sys
 import time
-import plotly.express as px
-from datetime import timezone
-import pandas as pd
 import datetime
 import warnings
-from IPython.display import display
+import pandas as pd
+import plotly.express as px
+from datetime import timezone
 from binance.enums import *
-from finlab_crypto.crawler import get_nbars_binance, get_all_binance
 from binance.client import Client
+from IPython.display import display
+from finlab_crypto.crawler import get_nbars_binance, get_all_binance
+
+
+warnings.filterwarnings(
+    "ignore",
+    message="The localize method is no longer necessary.*",
+)
 
 
 class TickerInfo():
