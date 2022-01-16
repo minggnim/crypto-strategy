@@ -6,10 +6,18 @@ from datetime import datetime
 from finlab_crypto.indicators import trends
 from finlab_crypto.strategy import Strategy, Filter
 from crypto_strategy.data import download_crypto_history, save_stats
-from .strategy_base import BestStrategy, InspectStrategy, CheckIndicators
-from .strategies import macd_strategy, macd_strategy_revised
-from .filters import mmi_filter, mmi_filter_ge_half, ang_filter, stoch_filter, sma_filter
-
+from .base import (
+    macd_strategy, 
+    macd_strategy_revised, 
+    mmi_filter, 
+    mmi_filter_ge_half, 
+    ang_filter, 
+    stoch_filter, 
+    sma_filter, 
+    BestStrategy, 
+    InspectStrategy, 
+    CheckIndicators
+)
 
 RANGE_FASTPERIOD = np.arange(10, 200, 10)
 RANGE_SLOWPERIOD = np.arange(10, 350, 10)

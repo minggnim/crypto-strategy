@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from datetime import datetime
 from crypto_strategy.data import download_crypto_history, save_stats
-from .strategy_base import BestStrategy, InspectStrategy, CheckIndicators
+from .base import BestStrategy, InspectStrategy, CheckIndicators
 from .strategies import breakout_strategy, breakout_strategy_revised
 from .filters import vol_filter, ang_filter
 

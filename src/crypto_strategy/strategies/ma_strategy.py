@@ -6,9 +6,14 @@ from datetime import datetime
 from finlab_crypto.indicators import trends
 from finlab_crypto.strategy import Strategy, Filter
 from crypto_strategy.data import download_crypto_history, save_stats
-from .strategy_base import BestStrategy, InspectStrategy, CheckIndicators
-from .strategies import trend_strategy
-from .filters import mmi_filter, mmi_filter_ge_half, ang_filter
+from .base import (
+    trend_strategy,
+    mmi_filter,
+    ang_filter,
+    BestStrategy, 
+    InspectStrategy, 
+    CheckIndicators
+)
 
 
 RANGE_WINDOW = np.arange(30, 300, 10)
@@ -27,22 +32,6 @@ def create_mmi_filter(flag_filter, **kwargs):
         )
     filters = {
         'mmi': mmi_filter.create({
-            'timeperiod': filter_config['timeperiod']
-        })
-    }
-    return filters
-
-def create_mmi_ge_filter(flag_filter, **kwargs):
-    if kwargs:
-        assert kwargs.get('timeperiod'),\
-            'mmi_ge fitler doesn\'t have config params provided'
-        filter_config = kwargs
-    else:
-        filter_config = dict(
-            timeperiod = RANGE_TIMEPERIOD,
-        )
-    filters = {
-        'mmi_ge': mmi_filter_ge_half.create({
             'timeperiod': filter_config['timeperiod']
         })
     }
@@ -73,8 +62,6 @@ def get_filter(flag_filter, **kwargs):
     filters = dict()
     if flag_filter == 'mmi':
         filters = create_mmi_filter(flag_filter, **kwargs)
-    if flag_filter == 'mmi_ge':
-        filters = create_mmi_ge_filter(flag_filter, **kwargs)
     if flag_filter == 'ang':
         filters = create_ang_filter(flag_filter, **kwargs)
     return filters
@@ -124,7 +111,7 @@ class BestMaStrategy(BestStrategy):
         return create_variables(**kwargs)
 
     def _get_grid_search(self):
-        if self.flag_filter in ('mmi', 'mmi_ge'):
+        if self.flag_filter == 'mmi':
             return self.grid_search_mmi_params()
         elif self.flag_filter == 'ang':
             return self.grid_search_ang_params()
@@ -159,8 +146,6 @@ class BestMaStrategy(BestStrategy):
         variables = self._get_variables(name=best_params['name'], n1=best_params['n1'], n2=best_params['n2'])
         filters = self._get_filter(
             timeperiod = best_params.get('mmi_timeperiod') \
-                or best_params.get('mmi_timeperiod') \
-                or best_params.get('mmi_ge_timeperiod') \
                 or best_params.get('ang_timeperiod'),
             threshold = best_params.get('ang_threshold')
             )
@@ -168,8 +153,6 @@ class BestMaStrategy(BestStrategy):
         filename = f"{symbol}-{self.freq}-{best_params['name']}-{best_params['n1']}-{best_params['n2']}-"
         if self.flag_filter == 'mmi':
             filename += f"{self.flag_filter}-{best_params['mmi_timeperiod']}-{self.date_str}.pkl"
-        elif self.flag_filter == 'mmi_ge':
-            filename += f"{self.flag_filter}-{best_params['mmi_ge_timeperiod']}-{self.date_str}.pkl"
         elif self.flag_filter == 'ang':
              filename += f"{self.flag_filter}-{best_params['ang_timeperiod']}-{best_params['ang_threshold']}-{self.date_str}.pkl"
         else:
