@@ -1,22 +1,20 @@
-import pandas as pd
-import math
-import os.path
+import json
 import time
+import math
+import requests
+import os.path
 from binance.client import Client
 from datetime import timedelta, datetime, timezone
 from dateutil import parser
 from tqdm import tqdm_notebook  # (Optional, used for progress-bars)
 
-import json
-import requests
+
 import pandas as pd
 
-### CONSTANTS
+
 binsizes = {"1m": 1, "5m": 5, '15m': 15, '30m': 30, "1h": 60, '2h': 120, "4h": 240, "1d": 1440}
 batch_size = 750
 
-
-### FUNCTIONS
 
 def minutes_of_new_data(symbol, kline_size, data, source, client):
     """Process old and new histrical price data format through binance api.
@@ -39,19 +37,19 @@ def minutes_of_new_data(symbol, kline_size, data, source, client):
     elif source == "binance":
         old = datetime.strptime('1 Jan 2017', '%d %b %Y')
     elif source == "bitmex":
-        old = client.Trade.Trade_getBucketed(symbol=symbol, binSize=kline_size, count=1, reverse=False).result()[0][0][
-            'timestamp']
-    if source == "binance": new = pd.to_datetime(client.get_klines(symbol=symbol, interval=kline_size)[-1][0],
-                                                 unit='ms')
-    if source == "bitmex": new = \
-    client.Trade.Trade_getBucketed(symbol=symbol, binSize=kline_size, count=1, reverse=True).result()[0][0]['timestamp']
+        old = client.Trade.Trade_getBucketed(symbol=symbol, binSize=kline_size, count=1, reverse=False).result()[0][0]['timestamp']
+    if source == "binance":
+        new = pd.to_datetime(client.get_klines(symbol=symbol, interval=kline_size)[-1][0], unit='ms')
+    if source == "bitmex":
+        new = client.Trade.Trade_getBucketed(symbol=symbol, binSize=kline_size, count=1, reverse=True).result()[0][0]['timestamp']
     return old, new
 
 
 def get_all_binance(symbol, kline_size, save=True, client=Client()):
     """Getting histrical price data through binance api.
 
-    Original code from: https://medium.com/swlh/retrieving-full-historical-data-for-every-cryptocurrency-on-binance-bitmex-using-the-python-apis-27b47fd8137f
+    Original code from
+    https://medium.com/swlh/retrieving-full-historical-data-for-every-cryptocurrency-on-binance-bitmex-using-the-python-apis-27b47fd8137f
 
     Args:
       symbol (str): Trading pair (ex: BTCUSDT).
@@ -75,8 +73,8 @@ def get_all_binance(symbol, kline_size, save=True, client=Client()):
     if oldest_point == datetime.strptime('1 Jan 2017', '%d %b %Y'):
         print('Downloading all available %s data for %s. Be patient..!' % (kline_size, symbol))
     else:
-        print('Downloading %d minutes of new data available for %s, i.e. %d instances of %s data.' % (
-        delta_min, symbol, available_data, kline_size))
+        print('Downloading %d minutes of new data available for %s, i.e. %d instances of %s data.'
+              % (delta_min, symbol, available_data, kline_size))
     klines = client.get_historical_klines(symbol, kline_size, oldest_point.strftime("%d %b %Y %H:%M:%S"),
                                           newest_point.strftime("%d %b %Y %H:%M:%S"))
     data = pd.DataFrame(klines,
@@ -90,7 +88,8 @@ def get_all_binance(symbol, kline_size, save=True, client=Client()):
         data_df = data
     data_df.set_index('timestamp', inplace=True)
     data_df = data_df[~data_df.index.duplicated(keep='last')]
-    if save and os.path.exists('./history'): data_df.to_csv(filename)
+    if save and os.path.exists('./history'):
+        data_df.to_csv(filename)
     print('All caught up..!')
     data_df.index = pd.to_datetime(data_df.index, utc=True)
     data_df = data_df[~data_df.index.duplicated(keep='last')]
@@ -131,7 +130,8 @@ def get_nbars_binance(symbol, interval, nbars, client):
 def get_all_bitmex(symbol, kline_size, save=True, client=None):
     """Getting histrical price data through bitmex api.
 
-    Original code from: https://medium.com/swlh/retrieving-full-historical-data-for-every-cryptocurrency-on-binance-bitmex-using-the-python-apis-27b47fd8137f
+    Original code from
+    https://medium.com/swlh/retrieving-full-historical-data-for-every-cryptocurrency-on-binance-bitmex-using-the-python-apis-27b47fd8137f
 
     Args:
       symbol (str): Trading pair (ex: BTCUSDT).
@@ -157,8 +157,8 @@ def get_all_bitmex(symbol, kline_size, save=True, client=None):
     available_data = math.ceil(delta_min / binsizes[kline_size])
     rounds = math.ceil(available_data / batch_size)
     if rounds > 0:
-        print('Downloading %d minutes of new data available for %s, i.e. %d instances of %s data in %d rounds.' % (
-        delta_min, symbol, available_data, kline_size, rounds))
+        print('Downloading %d minutes of new data available for %s, i.e. %d instances of %s data in %d rounds.'
+              % (delta_min, symbol, available_data, kline_size, rounds))
         for round_num in tqdm_notebook(range(rounds)):
             time.sleep(1)
             new_time = (oldest_point + timedelta(minutes=round_num * batch_size * binsizes[kline_size]))
@@ -170,7 +170,8 @@ def get_all_bitmex(symbol, kline_size, save=True, client=None):
     data_df.set_index('timestamp', inplace=True)
     data_df = data_df[~data_df.index.duplicated(keep='last')]
 
-    if save and rounds > 0 and os.path.exists('./history'): data_df.to_csv(filename)
+    if save and rounds > 0 and os.path.exists('./history'):
+        data_df.to_csv(filename)
     print('All caught up..!')
     data_df.index = pd.to_datetime(data_df.index, utc=True)
     return data_df.astype(float, errors='ignore')

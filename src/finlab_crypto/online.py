@@ -1,4 +1,3 @@
-import sys
 import time
 import datetime
 import warnings
@@ -103,7 +102,9 @@ class TradingMethod():
         name: A str of your trading method name (ex:'altcoin-trend-hullma').
 
     """
-    def __init__(self, symbols, freq, lookback, strategy, variables, weight_btc=None, weight=None, weight_unit=None, filters=None, name='', execution_price='close'):
+    def __init__(self, symbols, freq,
+                 lookback, strategy, variables,
+                 weight_btc=None, weight=None, weight_unit=None, filters=None, name='', execution_price='close'):
         self.symbols = symbols
         self.freq = freq
         self.lookback = lookback
@@ -114,7 +115,7 @@ class TradingMethod():
         self.weight_unit = weight_unit
         self.filters = filters
         self.name = name
-        self.execution_price=execution_price
+        self.execution_price = execution_price
 
         if self.weight_btc is None and self.weight is None:
             raise Exception("weight_btc or weight is missing.")
@@ -125,6 +126,7 @@ class TradingMethod():
         if self.weight_btc:
             self.weight = self.weight_btc
             self.weight_unit = 'BTC'
+
 
 class TradingPortfolio():
     """Connect Binance account.
@@ -155,9 +157,9 @@ class TradingPortfolio():
         """
 
         if trading_method.execution_price == 'open' and self.execute_before_candle_complete:
-            raise Exception("Detect execute_before_candle_complete=True and trading_method.execution_price is open"
-                    + "Please set trading_method.execute_before_candle_complete to False"
-                    + " and execute live trading right after candles are complete.")
+            raise Exception("Detect execute_before_candle_complete=True and trading_method.execution_price is open",
+                            "Please set trading_method.execute_before_candle_complete to False",
+                            " and execute live trading right after candles are complete.")
 
         self._trading_methods.append(trading_method)
 
@@ -260,7 +262,7 @@ class TradingPortfolio():
                 ohlcv = ohlcvs[(symbol, method.freq)].copy()
 
                 # remove incomplete candle
-                if self.execute_before_candle_complete == False and method.execution_price == 'close':
+                if self.execute_before_candle_complete is False and method.execution_price == 'close':
                     t = datetime.datetime.utcnow().replace(tzinfo=timezone.utc)
                     delta_t = ohlcv.index[-1] - ohlcv.index[-2]
                     ohlcv = ohlcv.loc[:t-delta_t]
@@ -277,8 +279,7 @@ class TradingPortfolio():
                 # find weight if it is in the nested dictionary
                 weight = method.weight
                 if isinstance(weight, dict):
-                    weight = (weight[symbol]
-                        if symbol in weight else weight['default'])
+                    weight = (weight[symbol] if symbol in weight else weight['default'])
 
                 entry_price = 0
                 entry_time = 0
@@ -311,10 +312,11 @@ class TradingPortfolio():
                         btc_quote_price_now = 1
 
                     previous_weight_btc = (weight / btc_quote_price_previous)
-                    value_in_btc = previous_weight_btc / quote_asset_price_previous * quote_asset_price_now / (btc_quote_price_now / btc_quote_price_previous)
+                    value_in_btc = previous_weight_btc / quote_asset_price_previous * quote_asset_price_now /\
+                                (btc_quote_price_now / btc_quote_price_previous)
                     weight_btc = previous_weight_btc
-                    previous_price_btc = quote_asset_price_previous  / btc_quote_price_previous
-                    present_price_btc = quote_asset_price_now  / btc_quote_price_now
+                    previous_price_btc = quote_asset_price_previous / btc_quote_price_previous
+                    present_price_btc = quote_asset_price_now / btc_quote_price_now
                     amount = previous_weight_btc / previous_price_btc
                     present_amount = value_in_btc / present_price_btc
                     assert 0.9999 < amount / present_amount < 1.0001
@@ -402,7 +404,7 @@ class TradingPortfolio():
             'margin_p': margin_position * asset_price_in_btc,
             'estimate_p': algo_value_in_btc + margin_position * asset_price_in_btc,
             'present_p': position * asset_price_in_btc,
-            'difference': (algo_value_in_btc + margin_position * asset_price_in_btc).clip(0,None) - position * asset_price_in_btc,
+            'difference': (algo_value_in_btc + margin_position * asset_price_in_btc).clip(0, None) - position * asset_price_in_btc,
             'rebalance_threshold': (algo_value_in_btc + margin_position * asset_price_in_btc).abs() * rebalance_threshold,
         })
         diff_value_btc['rebalance'] = diff_value_btc['difference'].abs() > diff_value_btc['rebalance_threshold']
@@ -499,9 +501,10 @@ class TradingPortfolio():
 
         # filter out orders where base asset is in quote asset list (ex: btcusdt)
         # assumption: base asset should only be paired by one quote asset
-        transaction = transaction[~(transaction.base_asset.isin(quote_asset_list) & (
-                    transaction.value_in_btc.abs() < diff_value_btc.loc[
-                transaction['base_asset']].rebalance_threshold.values))]
+        transaction = transaction[
+                        ~(transaction.base_asset.isin(quote_asset_list) &
+                        (transaction.value_in_btc.abs() < diff_value_btc.loc[transaction['base_asset']].rebalance_threshold.values))
+                        ]
 
         # verify diff_value
         def get_filters(exinfo, symbol):
@@ -630,8 +633,7 @@ class TradingPortfolio():
 
                 weight_btc = method.weight_btc
                 if isinstance(weight_btc, dict):
-                    weight_btc = (weight_btc[symbol]
-                        if symbol in weight_btc else weight_btc['default'])
+                    weight_btc = (weight_btc[symbol] if symbol in weight_btc else weight_btc['default'])
 
                 full_results.append({
                     'name': method.name,
@@ -704,8 +706,7 @@ class TradingPortfolio():
                 # find weight_btc if it is in the nested dictionary
                 weight_btc = method.weight
                 if isinstance(weight_btc, dict):
-                    weight_btc = (weight_btc[symbol]
-                        if symbol in weight else weight_btc['default'])
+                    weight_btc = (weight_btc[symbol] if symbol in weight else weight_btc['default'])
 
                 weight_btc *= self.ticker_info.get_asset_price_in_btc(method.weight_unit)
 
@@ -723,7 +724,7 @@ class TradingPortfolio():
 
         import matplotlib.pyplot as plt
         position = {}
-        quote_substract = {}
+        # quote_substract = {}
         for index, value in results.transpose().items():
             position[value.loc['name'] + '|' + value.symbol + '|' + value.freq] = (value.portfolio.cash() == 0).shift(
                 delay).ffill() * value.weight
@@ -829,7 +830,8 @@ def render_html(signals, position, position_btc, orders, order_results):
     <!DOCTYPE html>
     <head>
       <title>Saying Hello</title>
-      <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.3/build/pure-min.css" integrity="sha384-cg6SkqEOCV1NbJoCu11+bm0NvBRc8IYLRGXkmNrqUBfTjmMYwNKPWBTIKyw9mHNJ" crossorigin="anonymous">
+      <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.3/build/pure-min.css"
+      integrity="sha384-cg6SkqEOCV1NbJoCu11+bm0NvBRc8IYLRGXkmNrqUBfTjmMYwNKPWBTIKyw9mHNJ" crossorigin="anonymous">
       <meta name="viewport" content="width=device-width, initial-scale=1">
 
     </head>

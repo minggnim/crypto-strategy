@@ -1,5 +1,5 @@
-from IPython.display import display, HTML, IFrame, clear_output
-from itertools import compress, product
+from IPython.display import display, HTML
+from itertools import product
 from collections.abc import Iterable
 import matplotlib.pyplot as plt
 import tqdm.notebook as tqdm
@@ -8,11 +8,7 @@ import vectorbt as vbt
 import seaborn as sns
 import pandas as pd
 import numpy as np
-import copy
-import os
-
 from . import chart
-from . import overfitting
 
 
 def is_evalable(obj):
@@ -22,16 +18,20 @@ def is_evalable(obj):
     except:
         return False
 
+
 def remove_pd_object(d):
     ret = {}
     for n, v in d.items():
-        if ((not isinstance(v, pd.Series) and not isinstance(v, pd.DataFrame) and not callable(v) and is_evalable(v))
-            or isinstance(v, str)):
+        if ((not isinstance(v, pd.Series)
+            and not isinstance(v, pd.DataFrame)
+            and not callable(v)
+            and is_evalable(v)
+            ) or isinstance(v, str)):
             ret[n] = v
     return ret
 
-def enumerate_variables(variables):
 
+def enumerate_variables(variables):
     if not variables:
         return []
 
@@ -41,10 +41,12 @@ def enumerate_variables(variables):
     constant_d = {}
 
     for name, v in variables.items():
-        if (isinstance(v, Iterable) and not isinstance(v, str)
-            and not isinstance(v, pd.Series)
-            and not isinstance(v, pd.DataFrame)):
-
+        if (
+           isinstance(v, Iterable)
+           and not isinstance(v, str)
+           and not isinstance(v, pd.Series)
+           and not isinstance(v, pd.DataFrame)
+           ):
             enumeration_name.append(name)
             enumeration_vars.append(v)
         else:
@@ -105,7 +107,7 @@ def stop_early(ohlcv, entries, exits, stop_vars, enumeration=True):
     for s, slist in stop_vars.items():
         if s not in stop_vars_set:
             raise Exception(f'variable { s } is not one of the stop variables'
-                             ': sl_stop, ts_stop, or tp_stop')
+                            ': sl_stop, ts_stop, or tp_stop')
         if not isinstance(slist, Iterable):
             stop_vars[s] = [slist]
 
@@ -113,8 +115,8 @@ def stop_early(ohlcv, entries, exits, stop_vars, enumeration=True):
             length = len(stop_vars[s])
 
         if not enumeration and length != -1 and length != len(stop_vars[s]):
-            raise Exception(f'lengths of the variables are not align: '
-                    + str([len(stop_vars[s]) for s, slist in stop_vars.items()]))
+            raise Exception('lengths of the variables are not align: ',
+                            str([len(stop_vars[s]) for s, slist in stop_vars.items()]))
 
     if enumeration:
         stop_vars = enumerate_variables(stop_vars)
@@ -144,7 +146,8 @@ def stop_early(ohlcv, entries, exits, stop_vars, enumeration=True):
 
     return entries, stop_exits
 
-def plot_strategy(ohlcv, entries, exits, portfolio ,fig_data, html=None):
+
+def plot_strategy(ohlcv, entries, exits, portfolio, fig_data, html=None):
 
     # format trade data
     txn = portfolio.positions.records
@@ -170,20 +173,21 @@ def plot_strategy(ohlcv, entries, exits, portfolio ,fig_data, html=None):
         figures = fig_data['figures']
 
     figures['entries & exits'] = pd.DataFrame(
-        {'entries':entries.squeeze(), 'exits': exits.squeeze()})
+        {'entries': entries.squeeze(), 'exits': exits.squeeze()})
     figures['performance'] = portfolio.cumulative_returns()
 
     c, info = chart.chart(ohlcv, overlaps=overlaps,
                           figures=figures, markerlines=mark_lines,
                           start_date=ohlcv.index[-len(ohlcv)], end_date=ohlcv.index[-1])
     c.load_javascript()
-    if html is not None:          
+    if html is not None:
         c.render(html)
     else:
         c.render()
         display(HTML(filename='render.html'))
 
-    return 
+    return
+
 
 def plot_combination(portfolio, cscv_result=None, metric='final_value'):
 
@@ -197,7 +201,7 @@ def plot_combination(portfolio, cscv_result=None, metric='final_value'):
         if name1 != name2:
             sns.heatmap(item.reset_index().pivot(name1, name2)[0], cmap='magma_r', ax=ax)
         else:
-            getattr(portfolio, item_name).groupby(name1).mean().plot(ax=ax)
+            getattr(portfolio, item).groupby(name1).mean().plot(ax=ax)
 
     def best_n(portfolio, n):
         return getattr(portfolio, metric)().sort_values().tail(n).index
@@ -216,7 +220,6 @@ def plot_combination(portfolio, cscv_result=None, metric='final_value'):
     ax.set(xlabel='time', ylabel='drawdown (%)')
 
     plt.show()
-
 
     items = ['final_value', 'sharpe_ratio', 'sortino_ratio']
     fig, axes = plt.subplots(1, len(items), figsize=(15, 3),
@@ -260,14 +263,15 @@ def plot_combination(portfolio, cscv_result=None, metric='final_value'):
     axes[1].title.set_text('Performance degradation')
     x, y = pd.DataFrame([results['R_n_star'], results['R_bar_n_star']]).dropna(axis=1).values
     sns.regplot(x, y, ax=axes[1])
-    #axes[1].set_xlim(min(results['R_n_star']) * 1.2,max(results['R_n_star']) * 1.2)
-    #axes[1].set_ylim(min(results['R_bar_n_star']) * 1.2,max(results['R_bar_n_star']) * 1.2)
+    # axes[1].set_xlim(min(results['R_n_star']) * 1.2,max(results['R_n_star']) * 1.2)
+    # axes[1].set_ylim(min(results['R_bar_n_star']) * 1.2,max(results['R_bar_n_star']) * 1.2)
     axes[1].set_xlabel('In-sample Performance')
     axes[1].set_ylabel('Out-of-sample Performance')
 
     # first and second Stochastic dominance
     axes[2].title.set_text('Stochastic dominance')
-    if len(results['dom_df']) != 0: results['dom_df'].plot(ax=axes[2], secondary_y=['SD2'])
+    if len(results['dom_df']) != 0:
+        results['dom_df'].plot(ax=axes[2], secondary_y=['SD2'])
     axes[2].set_xlabel('Performance optimized vs non-optimized')
     axes[2].set_ylabel('Frequency')
 
@@ -288,7 +292,8 @@ def variable_visualization(portfolio):
         disabled=False,
     )
 
-    performance_metric = ['final_value',
+    performance_metric = [
+        'final_value',
         'calmar_ratio', 'max_drawdown', 'sharpe_ratio',
         'downside_risk', 'omega_ratio', 'conditional_value_at_risk']
 
@@ -301,7 +306,6 @@ def variable_visualization(portfolio):
 
     out = widgets.Output()
 
-    import matplotlib.pyplot as plt
     def update(v):
         name1 = dropdown1.value
         name2 = dropdown2.value
@@ -320,12 +324,12 @@ def variable_visualization(portfolio):
                 getattr(portfolio, performance)().groupby(name1).mean().plot()
             plt.show()
 
-
     dropdown1.observe(update, 'value')
     dropdown2.observe(update, 'value')
     performance_dropdwon.observe(update, 'value')
-    drawdowns = widgets.VBox([performance_dropdwon,
-                 widgets.HBox([dropdown1, dropdown2])])
+    drawdowns = widgets.VBox([
+        performance_dropdwon,
+        widgets.HBox([dropdown1, dropdown2])])
     display(drawdowns)
     display(out)
     update(0)

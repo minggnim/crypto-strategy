@@ -31,7 +31,7 @@ def create_mmi_filter(**kwargs):
         filter_config = kwargs
     else:
         filter_config = dict(
-            timeperiod = RANGE_TIMEPERIOD,
+            timeperiod=RANGE_TIMEPERIOD,
         )
     filters = {
         'mmi': mmi_filter.create({
@@ -40,18 +40,19 @@ def create_mmi_filter(**kwargs):
     }
     return filters
 
+
 def create_ang_filter(**kwargs):
     if kwargs:
         assert kwargs.get('timeperiod') and kwargs.get('threshold') is not None,\
             'Angle filter doesn\'t have config params provided'
         filter_config = dict(
-            timeperiod = kwargs['timeperiod'],
-            threshold = kwargs['threshold']
+            timeperiod=kwargs['timeperiod'],
+            threshold=kwargs['threshold']
         )
     else:
         filter_config = dict(
-            timeperiod = RANGE_TIMEPERIOD,
-            threshold = RANGE_THRESHOLD
+            timeperiod=RANGE_TIMEPERIOD,
+            threshold=RANGE_THRESHOLD
         )
     filters = {
         'ang': ang_filter.create({
@@ -61,18 +62,19 @@ def create_ang_filter(**kwargs):
     }
     return filters
 
+
 def create_stoch_filter(**kwargs):
     if kwargs:
         assert kwargs.get('fast') and kwargs.get('slow') is not None,\
             'Stoch filter doesn\'t have config params provided'
         filter_config = dict(
-            fast = kwargs['fast'],
-            slow = kwargs['slow']
+            fast=kwargs['fast'],
+            slow=kwargs['slow']
         )
     else:
         filter_config = dict(
-            fast = RANGE_FAST,
-            slow = RANGE_SLOW
+            fast=RANGE_FAST,
+            slow=RANGE_SLOW
         )
     filters = {
         'stoch': stoch_filter.create({
@@ -82,12 +84,13 @@ def create_stoch_filter(**kwargs):
     }
     return filters
 
+
 def create_sma_filter(**kwargs):
     if kwargs:
         assert kwargs.get('timeperiod') is not None,\
             'SMA filter doesn\'t have config params provided'
         filter_config = dict(
-            timeperiod = kwargs['timeperiod']
+            timeperiod=kwargs['timeperiod']
         )
     else:
         filter_config = dict(
@@ -100,6 +103,7 @@ def create_sma_filter(**kwargs):
     }
     return filters
 
+
 def get_filter(flag_filter, **kwargs):
     filters = dict()
     if flag_filter == 'mmi':
@@ -111,6 +115,7 @@ def get_filter(flag_filter, **kwargs):
     if flag_filter == 'sma':
         filters = create_sma_filter(**kwargs)
     return filters
+
 
 def create_variables(**kwargs):
     variables = dict()
@@ -219,12 +224,12 @@ class BestMacdStrategy(BestStrategy):
             signalperiod=best_params['signalperiod']
             )
         filters = self._get_filter(
-            timeperiod = best_params.get('mmi_timeperiod') \
-                or best_params.get('ang_timeperiod') \
-                or best_params.get('sma_timeperiod'),
-            threshold = best_params.get('ang_threshold'),
-            fast = best_params.get('stoch_fast'),
-            slow = best_params.get('stoch_slow')
+            timeperiod=best_params.get('mmi_timeperiod')
+            or best_params.get('ang_timeperiod')
+            or best_params.get('sma_timeperiod'),
+            threshold=best_params.get('ang_threshold'),
+            fast=best_params.get('stoch_fast'),
+            slow=best_params.get('stoch_slow')
             )
         portfolio = self.strategy.backtest(self.ohlcv, variables=variables, filters=filters, freq=self.freq)
         filename = f"{symbol}-{self.freq}-{best_params['fastperiod']}-{best_params['slowperiod']}-{best_params['signalperiod']}-"
@@ -288,19 +293,14 @@ class InspectMacdStrategy(InspectStrategy):
     flag_fitler: currently supported fitlers: 'mmi', 'ang', 'stoch', 'sma', default: None
     '''
     def __init__(self,
-                symbol: str,
-                freq: str,
-                fastperiod: int,
-                slowperiod: int,
-                signalperiod: int,
-                timeperiod: int = None,
-                threshold: int = None,
-                fast: int = None,
-                slow: int = None,
-                flag_filter: str = None,
-                strategy: str = 'macd',
-                show_fig: bool = True
-                ):
+                 symbol: str, freq: str,
+                 fastperiod: int, slowperiod: int, signalperiod: int,
+                 timeperiod: int = None, threshold: int = None,
+                 fast: int = None, slow: int = None,
+                 flag_filter: str = None,
+                 strategy: str = 'macd',
+                 show_fig: bool = True
+                 ):
         super().__init__(symbol, freq, flag_filter, strategy, show_fig)
         self.fastperiod = fastperiod
         self.slowperiod = slowperiod
@@ -327,6 +327,6 @@ class InspectMacdStrategy(InspectStrategy):
             self.flag_filter,
             timeperiod=self.timeperiod,
             threshold=self.threshold,
-            fast = self.fast,
-            slow = self.slow
+            fast=self.fast,
+            slow=self.slow
             )

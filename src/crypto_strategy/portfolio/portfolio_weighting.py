@@ -1,6 +1,7 @@
 from crypto_strategy.strategies.bo_strategy import InspectBoStrategy
 from crypto_strategy.strategies.ma_strategy import InspectMaStrategy
 
+
 def calc_kelly_criterion(stats):
     # winning probability
     p = stats['Win Rate [%]'] / 100
@@ -9,6 +10,7 @@ def calc_kelly_criterion(stats):
     # optimal share of capital to bet (b * p + p - 1) / b
     kc = p + (p - 1) / b
     return kc
+
 
 def tm_bo_stats(symbol, tm):
     parts = tm.split('-')
@@ -39,6 +41,7 @@ def tm_bo_stats(symbol, tm):
     )
     return ins.portfolio
 
+
 def tm_ma_stats(symbol, tm):
     parts = tm.split('-')
     freq = parts[1]
@@ -62,6 +65,7 @@ def tm_ma_stats(symbol, tm):
     )
     return ins.portfolio
 
+
 def portfolio_stats(tm_list):
     tp_stats = dict()
     for tm in tm_list:
@@ -77,6 +81,7 @@ def portfolio_stats(tm_list):
             stats = stats.stats()
             tp_stats[key] = stats
     return tp_stats
+
 
 def portfolio_kelly_criterion(tm_list):
     tp_kc = dict()
@@ -98,6 +103,7 @@ def portfolio_kelly_criterion(tm_list):
             raise ValueError(f'stats not found for {key}')
     return tp_kc
 
+
 def multi_assets_allocation(tm_list):
     tp_kc = dict()
     for tm in tm_list:
@@ -117,6 +123,7 @@ def multi_assets_allocation(tm_list):
             raise ValueError(f'stats not found for {key}')
     return tp_kc
 
+
 def portfolio_monthly_ret(tm_list):
     tp_monthly_ret = dict()
     for tm in tm_list:
@@ -131,6 +138,7 @@ def portfolio_monthly_ret(tm_list):
         if stats is not None:
             tp_monthly_ret[key] = stats.get_qs().monthly_returns()
     return tp_monthly_ret
+
 
 def portfolio_daily_ret(tm_list):
     tp_daily_ret = dict()

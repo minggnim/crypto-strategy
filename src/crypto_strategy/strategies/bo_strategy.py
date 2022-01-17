@@ -23,13 +23,13 @@ def create_vol_filter(flag_filter, **kwargs):
             assert kwargs.get('timeperiod') and kwargs.get('multiplier'),\
                 'Volume fitler doesn\'t have config params provided'
             filter_config = dict(
-                timeperiod = kwargs['timeperiod'],
-                multiplier = kwargs['multiplier']
+                timeperiod=kwargs['timeperiod'],
+                multiplier=kwargs['multiplier']
             )
         else:
             filter_config = dict(
-                timeperiod = RANGE_TIMEPERIOD,
-                multiplier = RANGE_MULTIPLIER
+                timeperiod=RANGE_TIMEPERIOD,
+                multiplier=RANGE_MULTIPLIER
             )
         filters = {
             'vol': vol_filter.create({
@@ -47,13 +47,13 @@ def create_ang_filter(flag_filter, **kwargs):
             assert kwargs.get('timeperiod') and kwargs.get('threshold') is not None,\
                 'Angle filter doesn\'t have config params provided'
             filter_config = dict(
-                timeperiod = kwargs['timeperiod'],
-                threshold = kwargs['threshold']
+                timeperiod=kwargs['timeperiod'],
+                threshold=kwargs['threshold']
             )
         else:
             filter_config = dict(
-                timeperiod = RANGE_TIMEPERIOD,
-                threshold = RANGE_THRESHOLD
+                timeperiod=RANGE_TIMEPERIOD,
+                threshold=RANGE_THRESHOLD
             )
         filters = {
             'ang': ang_filter.create({
@@ -85,13 +85,13 @@ def create_bo_variables(**kwargs):
         assert kwargs.get('long_window') and kwargs.get('short_window'), \
             'BO strategy doesn\'t have config params provided'
         variables = dict(
-            long_window = kwargs['long_window'],
-            short_window = kwargs['short_window']
+            long_window=kwargs['long_window'],
+            short_window=kwargs['short_window']
             )
     else:
         variables = dict(
-            long_window = RANGE_WINDOW,
-            short_window = RANGE_WINDOW
+            long_window=RANGE_WINDOW,
+            short_window=RANGE_WINDOW
         )
     return variables
 
@@ -101,17 +101,18 @@ def create_bo_variables_ts_stop(**kwargs):
         assert kwargs.get('long_window') and kwargs.get('short_window') and kwargs.get('ts_stop'), \
             'BO strategy doesn\'t have config params provided'
         variables = dict(
-            long_window = kwargs['long_window'],
-            short_window = kwargs['short_window'],
-            ts_stop = kwargs['ts_stop']
+            long_window=kwargs['long_window'],
+            short_window=kwargs['short_window'],
+            ts_stop=kwargs['ts_stop']
         )
     else:
         variables = dict(
-            long_window = RANGE_WINDOW,
-            short_window = RANGE_WINDOW,
-            ts_stop = RANGE_TS_STOP
+            long_window=RANGE_WINDOW,
+            short_window=RANGE_WINDOW,
+            ts_stop=RANGE_TS_STOP
         )
     return variables
+
 
 class BestBoStrategy(BestStrategy):
     '''
@@ -214,11 +215,9 @@ class BestBoStrategy(BestStrategy):
                 short_window=best_params['short_window']
             )
         filters = self._get_filter(
-            timeperiod = best_params.get('vol_timeperiod') \
-                if best_params.get('vol_timeperiod') \
-                else best_params.get('ang_timeperiod'),
-            multiplier = best_params.get('vol_multiplier'),
-            threshold = best_params.get('ang_threshold')
+            timeperiod=best_params.get('vol_timeperiod') if best_params.get('vol_timeperiod') else best_params.get('ang_timeperiod'),
+            multiplier=best_params.get('vol_multiplier'),
+            threshold=best_params.get('ang_threshold')
             )
         portfolio = self.strategy.backtest(self.ohlcv, freq=self.freq, variables=variables, filters=filters)
         filename = f'''{symbol}-{self.freq}-{self.strategy_name}-{best_params['long_window']}-{best_params['short_window']}-'''

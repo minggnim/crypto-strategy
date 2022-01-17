@@ -1,11 +1,10 @@
+import numpy as np
+import pandas as pd
+import pyecharts.options as opts
 from pyecharts.globals import CurrentConfig, NotebookType
 from pyecharts.charts import Kline, Line, Grid, Bar
 CurrentConfig.NOTEBOOK_TYPE = NotebookType.JUPYTER_LAB
 
-import pyecharts.options as opts
-import numpy as np
-import pandas as pd
-from pyecharts.charts import Candlestick
 
 def chart(dfstock, overlaps=dict(), figures=dict(), markers=dict(), markerlines=[], start_date=None, end_date=None):
     """Backtesting Analysis and optimizer dashboard platform.
@@ -40,7 +39,7 @@ def chart(dfstock, overlaps=dict(), figures=dict(), markers=dict(), markerlines=
     for mark in markers:
 
         if mark[1] not in dfstock.index:
-          continue
+            continue
 
         x = np.where(dfstock.index == mark[1])[0][0]
         y = dfstock.high.loc[mark[1]]
@@ -52,22 +51,22 @@ def chart(dfstock, overlaps=dict(), figures=dict(), markers=dict(), markerlines=
     for markline in markerlines:
         name, x, y = markline
         if x[0] not in dfstock.index or x[1] not in dfstock.index:
-          continue
+            continue
         xx0 = np.where(dfstock.index == x[0])[0][0]
         xx1 = np.where(dfstock.index == x[1])[0][0]
         x = [float(xx0), float(xx1)]
         modified_marklines.append([
-        {
-            'name': name,
-            'coord': [x[0], y[0]],
-            'itemStyle': {'color': '#216dc4'}
-        },
-        {
-            'coord': [x[1], y[1]]
-        }
-        ])
+            {
+                'name': name,
+                'coord': [x[0], y[0]],
+                'itemStyle': {'color': '#216dc4'}
+            },
+            {
+                'coord': [x[1], y[1]]
+            }
+            ])
 
-    #for m in modified_marklines:
+    # for m in modified_marklines:
     #  print(m.opts)
     #  print('------')
 
@@ -91,7 +90,7 @@ def chart(dfstock, overlaps=dict(), figures=dict(), markers=dict(), markerlines=
             ),
             markline_opts=opts.MarkLineOpts(
                 data=modified_marklines,
-                label_opts={'position':'insideMiddleTop', 'show': False}
+                label_opts={'position': 'insideMiddleTop', 'show': False}
             ),
             itemstyle_opts=opts.ItemStyleOpts(
                 color="#ff6183",
@@ -149,16 +148,10 @@ def chart(dfstock, overlaps=dict(), figures=dict(), markers=dict(), markerlines=
         )
     )
 
-
-    #################
-    # indicators
-    #################
-
     def is_item(item):
         return isinstance(item, pd.Series) or isinstance(item, tuple)
 
     def item_to_chart(name, item):
-
         if isinstance(item, pd.Series):
             item_type = 'line'
             series = item.loc[start_date:end_date]
@@ -176,22 +169,23 @@ def chart(dfstock, overlaps=dict(), figures=dict(), markers=dict(), markerlines=
         if item_type == 'line':
             chart = Line()
             chart.add_xaxis(xaxis_data=index)
-            chart.add_yaxis(series_name=name,
+            chart.add_yaxis(
+                series_name=name,
                 y_axis=values,
                 is_hover_animation=False,
-                #linestyle_opts=opts.LineStyleOpts(width=3, opacity=0.5),
+                # linestyle_opts=opts.LineStyleOpts(width=3, opacity=0.5),
                 label_opts=opts.LabelOpts(is_show=False),
-            )
+                )
         elif item_type == 'bar':
             chart = Bar()
             chart.add_xaxis(xaxis_data=index)
             chart.add_yaxis(
                 series_name=name,
                 yaxis_data=values,
-                #xaxis_index=1,
-                #yaxis_index=1,
+                # xaxis_index=1,
+                # yaxis_index=1,
                 label_opts=opts.LabelOpts(is_show=False),
-            )
+                )
 
         return chart
 
@@ -210,7 +204,7 @@ def chart(dfstock, overlaps=dict(), figures=dict(), markers=dict(), markerlines=
     if len(dfstock) <= 500:
         range_start = 0
     else:
-        range_start =  95#100 - int(10000/len(dfstock))
+        range_start = 95  # 100 - int(10000/len(dfstock))
 
     kline.set_global_opts(
             legend_opts=opts.LegendOpts(pos_top='0px', pos_left=str(margin_left)),
@@ -220,10 +214,10 @@ def chart(dfstock, overlaps=dict(), figures=dict(), markers=dict(), markerlines=
                 splitarea_opts=opts.SplitAreaOpts(
                     is_show=True, areastyle_opts=opts.AreaStyleOpts(opacity=0.3)
                 ),
-                #grid_index=1,
-                #split_number=3,
+                # grid_index=1,
+                # split_number=3,
                 axisline_opts=opts.AxisLineOpts(is_on_zero=False),
-                #axistick_opts=opts.AxisTickOpts(is_show=False),
+                # axistick_opts=opts.AxisTickOpts(is_show=False),
                 splitline_opts=opts.SplitLineOpts(is_show=False),
                 axislabel_opts=opts.LabelOpts(is_show=True),
             ),
@@ -244,7 +238,7 @@ def chart(dfstock, overlaps=dict(), figures=dict(), markers=dict(), markerlines=
                     range_end=100,
                 ),
             ],
-            #title_opts=opts.TitleOpts(title="Kline-DataZoom-inside"),
+            # title_opts=opts.TitleOpts(title="Kline-DataZoom-inside"),
         )
 
     # Kline And Line
@@ -277,7 +271,7 @@ def chart(dfstock, overlaps=dict(), figures=dict(), markers=dict(), markerlines=
     for i, chart in enumerate(example_charts):
         title_pos_top = title + main_chart_height + i * (sub_figure_height + title)
         chart.set_global_opts(
-                #title_opts=opts.TitleOpts(name, pos_top=str(title_pos_top+title_margin_top) + 'px'),
+                # title_opts=opts.TitleOpts(name, pos_top=str(title_pos_top+title_margin_top) + 'px'),
                 legend_opts=opts.LegendOpts(pos_left=str(margin_left), pos_top=str(title_pos_top+title_margin_top) + 'px'),
             )
         chart_pos_top = title_pos_top + title
@@ -286,7 +280,7 @@ def chart(dfstock, overlaps=dict(), figures=dict(), markers=dict(), markerlines=
             grid_opts=opts.GridOpts(pos_top=str(chart_pos_top) + 'px',
                                     height=str(sub_figure_height) + 'px',
                                     pos_left=str(margin_left)+'px', pos_right='0'
-                                   ),
+                                    ),
         )
         chart_size = {'height': total_height,  'width': width}
     return grid_chart, chart_size

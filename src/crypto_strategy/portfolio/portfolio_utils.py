@@ -18,40 +18,21 @@ def create_trading_portfolio(trading_methods: list, key_file='binance.key'):
 
 
 def concat_assets(ohlcv, symbols, start_bar=2000):
-    close_ref = pd.Series(np.concatenate(
-        [ohlcv[s]
-        .close
-        .astype(float)
-        .pct_change()
-        .values[start_bar:] for s in symbols]))
+    close_ref = pd.Series(np.concatenate([
+        ohlcv[s].close.astype(float).pct_change().values[start_bar:] for s in symbols]))
     ret_close = (close_ref + 1).cumprod()
 
     # use concatenate and list comprehension
-    close = pd.Series(np.concatenate(
-        [ohlcv[s]
-        .close
-        .astype(float)
-        .values[start_bar:] for s in symbols]))
-    high = pd.Series(np.concatenate(
-        [ohlcv[s]
-        .high
-        .astype(float)
-        .values[start_bar:] for s in symbols]))
-    low = pd.Series(np.concatenate(
-        [ohlcv[s]
-        .low
-        .astype(float)
-        .values[start_bar:] for s in symbols]))
-    open_ = pd.Series(np.concatenate(
-        [ohlcv[s]
-        .open
-        .astype(float)
-        .values[start_bar:] for s in symbols]))
-    volume = pd.Series(np.concatenate(
-        [ohlcv[s]
-        .volume
-        .astype(float)
-        .values[start_bar:] for s in symbols]))
+    close = pd.Series(np.concatenate([
+        ohlcv[s].close.astype(float).values[start_bar:] for s in symbols]))
+    high = pd.Series(np.concatenate([
+        ohlcv[s].high.astype(float).values[start_bar:] for s in symbols]))
+    low = pd.Series(np.concatenate([
+        ohlcv[s].low.astype(float).values[start_bar:] for s in symbols]))
+    open_ = pd.Series(np.concatenate([
+        ohlcv[s].open.astype(float).values[start_bar:] for s in symbols]))
+    volume = pd.Series(np.concatenate([
+        ohlcv[s].volume.astype(float).values[start_bar:] for s in symbols]))
 
     ret_high = ret_close * high / close
     ret_low = ret_close * low / close

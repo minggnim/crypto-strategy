@@ -41,7 +41,7 @@ def plot_indicators(portfolio, output_path=None, filename=None, show_fig=False):
 
     pbo_test = round(results['pbo_test'] * 100, 2)
     axes[0].title.set_text(f'Probability of overfitting: {pbo_test} %')
-    axes[0].hist(x=[l for l in results['logits'] if l > -10000], bins='auto')
+    axes[0].hist(x=[r for r in results['logits'] if r > -10000], bins='auto')
     axes[0].set_xlabel('Logits')
     axes[0].set_ylabel('Frequency')
 
@@ -49,8 +49,8 @@ def plot_indicators(portfolio, output_path=None, filename=None, show_fig=False):
     axes[1].title.set_text('Performance degradation')
     x, y = pd.DataFrame([results['R_n_star'], results['R_bar_n_star']]).dropna(axis=1).values
     sns.regplot(x, y, ax=axes[1])
-    #axes[1].set_xlim(min(results['R_n_star']) * 1.2,max(results['R_n_star']) * 1.2)
-    #axes[1].set_ylim(min(results['R_bar_n_star']) * 1.2,max(results['R_bar_n_star']) * 1.2)
+    # axes[1].set_xlim(min(results['R_n_star']) * 1.2,max(results['R_n_star']) * 1.2)
+    # axes[1].set_ylim(min(results['R_bar_n_star']) * 1.2,max(results['R_bar_n_star']) * 1.2)
     axes[1].set_xlabel('In-sample Performance')
     axes[1].set_ylabel('Out-of-sample Performance')
 
@@ -71,7 +71,7 @@ def plot_indicators(portfolio, output_path=None, filename=None, show_fig=False):
 
 def plot_returns(btc_acc_returns, eth_acc_returns, pf_acc_returns, start_date):
     fig, ax = plt.subplots()
-    btc_acc_returns.plot(figsize=(8,6), label='BTC')
+    btc_acc_returns.plot(figsize=(8, 6), label='BTC')
     eth_acc_returns.plot(label='ETH')
     pf_acc_returns.plot(label='Portfolio')
     ax.legend()

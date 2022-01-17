@@ -20,6 +20,7 @@ SYMBOLS = [s + b for s in SYMBOLS for b in BASES]
 def cli():
     pass
 
+
 @cli.command()
 @click.option('--symbol', '-s', type=str, default=None, help="asset name, e.g., BTCUSDT")
 @click.option('--freq', '-f', required=True, type=click.Choice(['4h', '1h']), help="frquency to use")
@@ -29,13 +30,14 @@ def best_ma_strategy(symbol, freq, res_dir, flag_filter):
     parts = res_dir.split('-')
     if freq not in parts:
         raise ValueError('Mismatch found in freq setting and output dir')
-    if (flag_filter and not flag_filter in parts) or (not flag_filter and 'filter' in parts):
+    if (flag_filter and flag_filter not in parts) or (not flag_filter and 'filter' in parts):
         raise ValueError('Mismatch found in filter setting and output dir')
     if symbol:
         symbols = [symbol]
     else:
         symbols = SYMBOLS
     BestMaStrategy(symbols, freq, res_dir, flag_filter)
+
 
 @cli.command()
 @click.option('--symbol', '-s', type=str, default=None, help='asset name, e.g., BTCUSDT')
@@ -44,9 +46,9 @@ def best_ma_strategy(symbol, freq, res_dir, flag_filter):
 @click.option('--flag_filter', '-g', type=str, default=None, show_default=True, help='flag to use, mmi | ang')
 def check_ma_indicators(symbol, date, res_dir, flag_filter, ):
     parts = res_dir.split('-')
-    if (flag_filter and not flag_filter in parts) or (not flag_filter and 'filter' in parts):
+    if (flag_filter and flag_filter not in parts) or (not flag_filter and 'filter' in parts):
         raise ValueError('Mismatch found in filter setting and output dir')
-    if not 'ma' in parts:
+    if 'ma' not in parts:
         raise ValueError('Make sure the res_dir is for MA strategy')
     if symbol:
         symbols = [symbol]
@@ -65,7 +67,7 @@ def best_bo_strategy(symbol, freq, res_dir, flag_filter, flag_ts_stop):
     parts = res_dir.split('-')
     if freq not in parts:
         raise ValueError('Mismatch found in freq setting and output dir')
-    if (flag_filter and not flag_filter in parts) or (not flag_filter and 'filter' in parts):
+    if (flag_filter and flag_filter not in parts) or (not flag_filter and 'filter' in parts):
         raise ValueError('Mismatch found in filter setting and output dir')
     if 'bo' not in parts:
         raise ValueError('Mismatch found in strategy bo and output dir')
@@ -77,6 +79,7 @@ def best_bo_strategy(symbol, freq, res_dir, flag_filter, flag_ts_stop):
         symbols = SYMBOLS
     BestBoStrategy(symbols, freq, res_dir, flag_filter, flag_ts_stop)
 
+
 @cli.command()
 @click.option('--symbol', '-s', type=str, default=None, help="asset name, e.g., BTCUSDT")
 @click.option('--date', '-d', type=str, help='the date when the results are generated')
@@ -84,7 +87,7 @@ def best_bo_strategy(symbol, freq, res_dir, flag_filter, flag_ts_stop):
 @click.option('--flag_filter', '-g', type=str, default=None, show_default=True, help='filter to use, vol | ang')
 def check_bo_indicators(symbol, date, res_dir, flag_filter):
     parts = res_dir.split('-')
-    if (flag_filter and not flag_filter in parts) or (not flag_filter and 'filter' in parts):
+    if (flag_filter and flag_filter not in parts) or (not flag_filter and 'filter' in parts):
         raise ValueError('Mismatch found in filter setting and output dir')
     if 'bo' not in parts:
         raise ValueError('Mismatch found in strategy bo and output dir')
