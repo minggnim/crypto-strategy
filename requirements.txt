@@ -5,3 +5,5 @@ ta-lib==0.4.23
 vectorbt==0.23.0
 python-binance==0.7.5
 tqdm==4.62.3
+seaborn==0.11.2
+pyecharts==1.9.1
