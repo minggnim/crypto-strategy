@@ -28,6 +28,7 @@ def trend_strategy(ohlcv):
     }
     return entries, exits, figures
 
+
 @Strategy(long_window=30, short_window=30)
 def breakout_strategy(ohlcv):
     lw = breakout_strategy.long_window
@@ -44,6 +45,7 @@ def breakout_strategy(ohlcv):
     }
     return entries, exits, figures
 
+
 # macd strategy
 @Strategy(fastperiod=12, slowperiod=26, signalperiod=9)
 def macd_strategy(ohlcv):
@@ -57,11 +59,12 @@ def macd_strategy(ohlcv):
     entries = (macdhist > 0) & (macdhist.shift() < 0)
     exits = (macdhist < 0) & (macdhist.shift() > 0)
     figures = {
-        'figures':{
+        'figures': {
             'macdhist': macdhist
         }
     }
     return entries, exits, figures
+
 
 @Strategy(fastperiod=12, slowperiod=26, signalperiod=9)
 def macd_strategy_revised(ohlcv):
@@ -74,11 +77,12 @@ def macd_strategy_revised(ohlcv):
     entries = (macdhist > 0) & (macdhist.shift() < 0) & (macd > 0)
     exits = (macdhist < 0) & (macdhist.shift() > 0) & (macd < 0)
     figures = {
-        'macd':{
+        'macd': {
             'macdhist': macdhist
             }
         }
     return entries, exits, figures
+
 
 @Strategy(timeperiod=14, buy_threshold=52, sell_threshold=50)
 def rsi_strategy(ohlcv):
@@ -106,6 +110,7 @@ def mmi_filter(ohlcv):
     }
     return mmi >= 0.5, figures
 
+
 @Filter(timeperiod=20, multiplier=2)
 def vol_filter(ohlcv):
     vol_mean = ohlcv.volume.rolling(vol_filter.timeperiod).mean()
@@ -116,6 +121,7 @@ def vol_filter(ohlcv):
       }
     }
     return vol >= 1, figures
+
 
 @Filter(timeperiod=20, threshold=0)
 def ang_filter(ohlcv):
@@ -134,9 +140,10 @@ def stoch_filter(ohlcv):
     fast = stoch_filter.fast
     slow = stoch_filter.slow
     matype = stoch_filter.matype
-    k, d = talib.STOCH(ohlcv.high, ohlcv.low, ohlcv.close,
-                fastk_period=fast, slowk_period=slow, slowk_matype=matype,
-                slowd_period=slow, slowd_matype=matype)
+    k, d = talib.STOCH(
+        ohlcv.high, ohlcv.low, ohlcv.close,
+        fastk_period=fast, slowk_period=slow, slowk_matype=matype,
+        slowd_period=slow, slowd_matype=matype)
     signals = (k > d) & (k > 50) & (k < 50) if side == 'long' else k < d
     fig = {
         'figures': {
@@ -166,7 +173,7 @@ class BestStrategy(ABC):
         self.strategy_name = strategy
         self.strategy = self._get_strategy(strategy)
         self.date_str = datetime.today().date().strftime("%Y-%m-%d")
-        self.output_path = check_and_create_dir(res_dir, self.date_str.replace('-',''))
+        self.output_path = check_and_create_dir(res_dir, self.date_str.replace('-', ''))
         self.output_path = pathlib.Path(self.output_path)
 
     @staticmethod
@@ -174,7 +181,7 @@ class BestStrategy(ABC):
         if flag_filter and flag_filter not in res_dir:
             raise ValueError(f'The res_dir name should contain {flag_filter} filter')
         if not flag_filter and 'filter' in res_dir:
-            raise ValueError(f'The res_dir name should not contain filter name')
+            raise ValueError('The res_dir name should not contain filter name')
 
     @abstractmethod
     def _get_strategy(self, strategy):
@@ -224,12 +231,12 @@ class BestStrategy(ABC):
 
 class CheckIndicators(ABC):
     def __init__(self,
-                symbols: list,
-                date: str,
-                res_dir: str,
-                flag_filter: str,
-                strategy: str,
-                show_fig: bool = False):
+                 symbols: list,
+                 date: str,
+                 res_dir: str,
+                 flag_filter: str,
+                 strategy: str,
+                 show_fig: bool = False):
         self.symbols = symbols
         self.date = date
         self.flag_filter = flag_filter
@@ -273,11 +280,11 @@ class CheckIndicators(ABC):
 
 class InspectStrategy(ABC):
     def __init__(self,
-                symbol: str,
-                freq: str,
-                flag_filter: str,
-                strategy: str,
-                show_fig: bool = True):
+                 symbol: str,
+                 freq: str,
+                 flag_filter: str,
+                 strategy: str,
+                 show_fig: bool = True):
         self.symbol = symbol
         self.freq = freq
         self.flag_filter = flag_filter
@@ -295,7 +302,7 @@ class InspectStrategy(ABC):
 
     @abstractmethod
     def _get_filter(self):
-        pass 
+        pass
 
     def inspect(self):
         self.portfolio = self.strategy.backtest(

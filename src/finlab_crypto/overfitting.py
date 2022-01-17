@@ -1,18 +1,15 @@
-from statsmodels.distributions.empirical_distribution import ECDF
-import itertools as itr
-import seaborn as sns
-
-import matplotlib.pyplot as plt
-import pandas as pd
-import numpy as np
-import datetime
 import math
+import itertools as itr
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from statsmodels.distributions.empirical_distribution import ECDF
 
 sharpe_ratio = lambda r: r.mean() / (r.std()+0.0000001) * (365 ** 0.5)
 
+
 class CSCV(object):
     """Combinatorially symmetric cross-validation algorithm.
-
     Calculate backtesting about overfitting probability distribution and performance degradation.
 
     Attributes:
@@ -89,7 +86,7 @@ class CSCV(object):
 
         # estimate logits of OOS rankings
         logits = (1-((r_bar_rank_series)/(len(R_df.columns)+1))).map(lambda p: math.log(p/(1-p)))
-        prob = (logits < 0).sum() / len(logits)
+        # prob = (logits < 0).sum() / len(logits)
 
         # stochastic dominance
 
@@ -107,10 +104,8 @@ class CSCV(object):
             R_bar_mean_cdf = ECDF(R_bar_df.median(axis=1).values)
             non_optimized = R_bar_mean_cdf(y)
 
-            #
             dom_df = pd.DataFrame(
-                dict(optimized_IS=optimized, non_optimized_OOS=non_optimized)
-            , index=y)
+                dict(optimized_IS=optimized, non_optimized_OOS=non_optimized), index=y)
             dom_df["SD2"] = -(dom_df.non_optimized_OOS - dom_df.optimized_IS).cumsum()
         else:
             dom_df = pd.DataFrame(columns=['optimized_IS', 'non_optimized_OOS', 'SD2'])
@@ -126,7 +121,7 @@ class CSCV(object):
         if plot:
             # probability distribution
             plt.title('Probability Distribution')
-            plt.hist(x=[l for l in ret['logits'] if l > -10000], bins='auto')
+            plt.hist(x=[r for r in ret['logits'] if r > -10000], bins='auto')
             plt.xlabel('Logits')
             plt.ylabel('Frequency')
             plt.show()

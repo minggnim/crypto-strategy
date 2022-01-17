@@ -20,7 +20,7 @@ def create_mmi_filter(**kwargs):
         filter_config = kwargs
     else:
         filter_config = dict(
-            timeperiod = RANGE_TIMEPERIOD,
+            timeperiod=RANGE_TIMEPERIOD,
         )
     filters = {
         'mmi': mmi_filter.create({
@@ -29,18 +29,19 @@ def create_mmi_filter(**kwargs):
     }
     return filters
 
+
 def create_ang_filter(**kwargs):
     if kwargs:
         assert kwargs.get('timeperiod') and kwargs.get('threshold') is not None,\
             'Angle filter doesn\'t have config params provided'
         filter_config = dict(
-            timeperiod = kwargs['timeperiod'],
-            threshold = kwargs['threshold']
+            timeperiod=kwargs['timeperiod'],
+            threshold=kwargs['threshold']
         )
     else:
         filter_config = dict(
-            timeperiod = RANGE_TIMEPERIOD,
-            threshold = RANGE_THRESHOLD
+            timeperiod=RANGE_TIMEPERIOD,
+            threshold=RANGE_THRESHOLD
         )
     filters = {
         'ang': ang_filter.create({
@@ -50,6 +51,7 @@ def create_ang_filter(**kwargs):
     }
     return filters
 
+
 def get_filter(flag_filter, **kwargs):
     filters = dict()
     if flag_filter == 'mmi':
@@ -58,10 +60,11 @@ def get_filter(flag_filter, **kwargs):
         filters = create_ang_filter(**kwargs)
     return filters
 
+
 def create_variables(**kwargs):
     name = kwargs.get('name')
     if name:
-        variables = dict(name = name)
+        variables = dict(name=name)
     else:
         raise ValueError('The name of the MA strategy is required')
     if kwargs.get('n1') and kwargs.get('n2'):
@@ -136,9 +139,8 @@ class BestMaStrategy(BestStrategy):
     def apply_best_params(self, best_params, symbol):
         variables = self._get_variables(name=best_params['name'], n1=best_params['n1'], n2=best_params['n2'])
         filters = self._get_filter(
-            timeperiod = best_params.get('mmi_timeperiod') \
-                or best_params.get('ang_timeperiod'),
-            threshold = best_params.get('ang_threshold')
+            timeperiod=best_params.get('mmi_timeperiod') or best_params.get('ang_timeperiod'),
+            threshold=best_params.get('ang_threshold')
             )
         portfolio = self.strategy.backtest(self.ohlcv, variables=variables, filters=filters, freq=self.freq)
         filename = f"{symbol}-{self.freq}-{best_params['name']}-{best_params['n1']}-{best_params['n2']}-"
@@ -199,14 +201,14 @@ class InspectMaStrategy(InspectStrategy):
     flag_fitler: currently supported fitlers: 'mmi', 'ang', default: None
     '''
     def __init__(self,
-                symbol: str, freq: str,
-                name: str, n1: int, n2: int,
-                timeperiod: int = None,
-                threshold: int = None,
-                flag_filter: str = None,
-                strategy: str = 'ma',
-                show_fig: bool = True
-                ):
+                 symbol: str, freq: str,
+                 name: str, n1: int, n2: int,
+                 timeperiod: int = None,
+                 threshold: int = None,
+                 flag_filter: str = None,
+                 strategy: str = 'ma',
+                 show_fig: bool = True
+                 ):
         super().__init__(symbol, freq, flag_filter, strategy, show_fig)
         self.name = name
         self.n1 = n1

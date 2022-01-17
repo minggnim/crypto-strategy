@@ -19,17 +19,21 @@ def price():
     })
     return price
 
+
 @pytest.fixture
 def entries():
     return pd.DataFrame([True] + [False]*5)
+
 
 @pytest.fixture
 def exits():
     return pd.DataFrame([False] * 6)
 
+
 @pytest.fixture
 def stop_vars():
     return {'ts_stop': 0.1}
+
 
 @pytest.fixture
 def transform_stop_vars(stop_vars):
@@ -42,6 +46,7 @@ def transform_stop_vars(stop_vars):
 def test_transform_stop_vars(transform_stop_vars):
     assert transform_stop_vars == {'sl_stop': [0.1], 'sl_trail': [True], 'ts_stop': [0.1]}
 
+
 def test_ohlcstx(entries, price, transform_stop_vars):
     ohlcstx = vbt.OHLCSTX.run(
         entries,
@@ -52,18 +57,19 @@ def test_ohlcstx(entries, price, transform_stop_vars):
         **transform_stop_vars,
     )
     np.testing.assert_array_equal(
-        ohlcstx.exits.squeeze(), 
+        ohlcstx.exits.squeeze(),
         [False, False, False, True, False, False]
         )
     np.testing.assert_allclose(
-        ohlcstx.stop_price.squeeze(), 
-        [np.nan, np.nan, np.nan, 11.7, np.nan, np.nan], 
+        ohlcstx.stop_price.squeeze(),
+        [np.nan, np.nan, np.nan, 11.7, np.nan, np.nan],
         rtol=1e-10, atol=0
         )
     np.testing.assert_array_equal(
         ohlcstx.stop_type_readable.squeeze(),
         [None, None, None, 'TrailStop', None, None]
         )
+
 
 def test_ts_stop(price, entries, exits, stop_vars):
     entries_after, exits_after = stop_early(price, entries, exits, stop_vars)

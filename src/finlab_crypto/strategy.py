@@ -77,7 +77,6 @@ class Filter(object):
             for key, val in variables.items():
                 setattr(self, key, val)
 
-
     def show_parameters(self):
         parameters = {}
         for key, val in self._default_parameters.items():
@@ -128,6 +127,7 @@ class Filter(object):
             return signals, fig_data
 
         return ret_f
+
 
 class Strategy(object):
     """strategy features plug-in.
@@ -357,10 +357,10 @@ class Strategy(object):
         if side == 'long':
 
             if not compounded:
-                args['size'] = vbt.defaults.portfolio['init_cash'] /  ohlcv_lookback.close[0]
+                args['size'] = vbt.defaults.portfolio['init_cash'] / ohlcv_lookback.close[0]
 
             assert execution_price == 'close' or execution_price == 'open'
-            price = ohlcv_lookback[execution_price] if execution_price == 'close' else ohlcv_lookback[execution_price].shift(-1).bfill()
+            # price = ohlcv_lookback[execution_price] if execution_price == 'close' else ohlcv_lookback[execution_price].shift(-1).bfill()
 
             portfolio = vbt.Portfolio.from_signals(
                 ohlcv_lookback[execution_price], entries.fillna(False), exits.fillna(False), **args)
