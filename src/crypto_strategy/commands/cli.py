@@ -1,16 +1,16 @@
 import click
-from crypto_strategy.ma_strategy import BestMaStrategy, CheckMaIndicators
-from crypto_strategy.bo_strategy import BestBoStrategy, CheckBoIndicators
-from crypto_strategy.reporting import generate_report as _generate_report
+from crypto_strategy.strategies.ma_strategy import BestMaStrategy, CheckMaIndicators
+from crypto_strategy.strategies.bo_strategy import BestBoStrategy, CheckBoIndicators
+from crypto_strategy.reporting.report import generate_report as _generate_report
 
 
 SYMBOLS = [
     'BTC', 'ETH', 'BNB', 'SOL', 'ADA',
     'XRP', 'DOT', 'DOGE', 'AVAX', 'LUNA',
-    'LTC', 'UNI', 'LINK', 'ALGO', 
-    'VET', 'MATIC', 
+    'LTC', 'UNI', 'LINK', 'ALGO',
+    'VET', 'MATIC',
     # # under review
-    # 'XTZ', 'BCH', 'EGLD', 'XLM', 'AXS',  
+    # 'XTZ', 'BCH', 'EGLD', 'XLM', 'AXS',
 ]
 BASES = ['USDT']
 SYMBOLS = [s + b for s in SYMBOLS for b in BASES]
@@ -28,9 +28,9 @@ def cli():
 def best_ma_strategy(symbol, freq, res_dir, flag_filter):
     parts = res_dir.split('-')
     if freq not in parts:
-        raise(ValueError('Mismatch found in freq setting and output dir'))
+        raise ValueError('Mismatch found in freq setting and output dir')
     if (flag_filter and not flag_filter in parts) or (not flag_filter and 'filter' in parts):
-        raise(ValueError('Mismatch found in filter setting and output dir'))
+        raise ValueError('Mismatch found in filter setting and output dir')
     if symbol:
         symbols = [symbol]
     else:
@@ -45,14 +45,14 @@ def best_ma_strategy(symbol, freq, res_dir, flag_filter):
 def check_ma_indicators(symbol, date, res_dir, flag_filter, ):
     parts = res_dir.split('-')
     if (flag_filter and not flag_filter in parts) or (not flag_filter and 'filter' in parts):
-        raise(ValueError('Mismatch found in filter setting and output dir'))
+        raise ValueError('Mismatch found in filter setting and output dir')
     if not 'ma' in parts:
-        raise(ValueError('Make sure the res_dir is for MA strategy'))
+        raise ValueError('Make sure the res_dir is for MA strategy')
     if symbol:
         symbols = [symbol]
     else:
         symbols = SYMBOLS
-    CheckMaIndicators(symbols, date, res_dir, flag_filter)  
+    CheckMaIndicators(symbols, date, res_dir, flag_filter)
 
 
 @cli.command()
@@ -64,13 +64,13 @@ def check_ma_indicators(symbol, date, res_dir, flag_filter, ):
 def best_bo_strategy(symbol, freq, res_dir, flag_filter, flag_ts_stop):
     parts = res_dir.split('-')
     if freq not in parts:
-        raise(ValueError('Mismatch found in freq setting and output dir'))
+        raise ValueError('Mismatch found in freq setting and output dir')
     if (flag_filter and not flag_filter in parts) or (not flag_filter and 'filter' in parts):
-        raise(ValueError('Mismatch found in filter setting and output dir'))
-    if strategy == 'bo' and 'bo' not in parts:
-        raise(ValueError('Mismatch found in bo_revised setting and output dir'))
+        raise ValueError('Mismatch found in filter setting and output dir')
+    if 'bo' not in parts:
+        raise ValueError('Mismatch found in strategy bo and output dir')
     if flag_ts_stop and 'ts_stop' not in parts:
-        raise(ValueError('Mismatch found in ts_stop setting and output dir'))
+        raise ValueError('Mismatch found in ts_stop setting and output dir')
     if symbol:
         symbols = [symbol]
     else:
@@ -85,14 +85,14 @@ def best_bo_strategy(symbol, freq, res_dir, flag_filter, flag_ts_stop):
 def check_bo_indicators(symbol, date, res_dir, flag_filter):
     parts = res_dir.split('-')
     if (flag_filter and not flag_filter in parts) or (not flag_filter and 'filter' in parts):
-        raise(ValueError('Mismatch found in filter setting and output dir'))
-    if strategy == 'bo' and 'bo' not in parts:
-        raise(ValueError('Mismatch found in bo_revised setting and output dir'))
+        raise ValueError('Mismatch found in filter setting and output dir')
+    if 'bo' not in parts:
+        raise ValueError('Mismatch found in strategy bo and output dir')
     if symbol:
         symbols = [symbol]
     else:
         symbols = SYMBOLS
-    CheckBoIndicators(symbols, date, res_dir, flag_filter)  
+    CheckBoIndicators(symbols, date, res_dir, flag_filter)
 
 
 @cli.command()
@@ -101,8 +101,8 @@ def generate_report(symbol):
     if symbol:
         _generate_report(symbol)
     else:
-        for symbol in SYMBOLS:
-            _generate_report(symbol)
+        for symb in SYMBOLS:
+            _generate_report(symb)
 
 
 if __name__ == '__main__':

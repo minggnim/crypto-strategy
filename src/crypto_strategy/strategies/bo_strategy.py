@@ -1,8 +1,7 @@
 import os
 import numpy as np
 import pandas as pd
-from datetime import datetime
-from crypto_strategy.data import download_crypto_history, save_stats
+from crypto_strategy.data import download_crypto_history
 from .base import (
     breakout_strategy,
     vol_filter, ang_filter,
@@ -127,7 +126,7 @@ class BestBoStrategy(BestStrategy):
     def __init__(self, symbols: list, freq: str, res_dir: str,
                  flag_filter: str = None,
                  flag_ts_stop: bool = False,
-                 strategy: str = 'bo', 
+                 strategy: str = 'bo',
                  ):
         super().__init__(symbols, freq, res_dir, flag_filter, strategy)
         self.flag_ts_stop = flag_ts_stop
@@ -161,23 +160,22 @@ class BestBoStrategy(BestStrategy):
                 total_best_params
                 .query('gap > 0')
                 .sort_values(
-                    by=['sharpe', 'gap', 'short_window', 'advstex_ts_stop'], 
-                    ascending=[True, True, False, False]
-                    )
+                    by=['sharpe', 'gap', 'short_window', 'advstex_ts_stop'],
+                    ascending=[True, True, False, False])
             )
         else:
             total_best_params = (
                 total_best_params
                 .query('gap > 0')
                 .sort_values(
-                    by=['sharpe', 'gap', 'short_window'], 
+                    by=['sharpe', 'gap', 'short_window'],
                     ascending=[True, True, False]
                     )
-            ) 
+            )
 
         print(total_best_params)
         return total_best_params.tail(1).to_dict(orient='records')[0] if not total_best_params.empty else None
-    
+
     def grid_search_params(self):
         variables = self._get_variables()
         best_params = self.backtest(variables)
@@ -206,13 +204,13 @@ class BestBoStrategy(BestStrategy):
     def apply_best_params(self, best_params, symbol):
         if self.flag_ts_stop:
             variables = self._get_variables(
-                long_window=best_params['long_window'], 
+                long_window=best_params['long_window'],
                 short_window=best_params['short_window'],
                 ts_stop=best_params['advstex_ts_stop']
             )
         else:
             variables = self._get_variables(
-                long_window=best_params['long_window'], 
+                long_window=best_params['long_window'],
                 short_window=best_params['short_window']
             )
         filters = self._get_filter(
@@ -229,7 +227,7 @@ class BestBoStrategy(BestStrategy):
         if self.flag_filter == 'vol':
             filename += f'''{self.flag_filter}-{best_params['vol_timeperiod']}-{best_params['vol_multiplier']}-{self.date_str}.pkl'''
         elif self.flag_filter == 'ang':
-             filename += f'''{self.flag_filter}-{best_params['ang_timeperiod']}-{best_params['ang_threshold']}-{self.date_str}.pkl'''
+            filename += f'''{self.flag_filter}-{best_params['ang_timeperiod']}-{best_params['ang_threshold']}-{self.date_str}.pkl'''
         else:
             filename += f'''{self.date_str}.pkl'''
         filename = os.path.join(self.output_path, filename)
@@ -251,7 +249,7 @@ class BestBoStrategy(BestStrategy):
 
 class CheckBoIndicators(CheckIndicators):
     '''
-    This class provides the method to check Partial Differentiation 
+    This class provides the method to check Partial Differentiation
     and Combinatorially Symmetric Cross-validation of BO strategy.
     symbols: a list of symbols to be optimzied on, e.g., ['BTCUSDT']
     date: the date the best params are created
@@ -260,11 +258,11 @@ class CheckBoIndicators(CheckIndicators):
     flag_ts_stop: flag to turn on/off trailing stop
     strategy: currently supported values: 'bo'
     '''
-    def __init__(self, 
-                 symbols: list, 
-                 date: str, 
+    def __init__(self,
+                 symbols: list,
+                 date: str,
                  res_dir: str,
-                 flag_filter: str = None, 
+                 flag_filter: str = None,
                  flag_ts_stop: bool = False,
                  strategy: str = 'bo'
                  ):
@@ -294,7 +292,7 @@ class InspectBoStrategy(InspectStrategy):
     flag_filter: currently supported fitlers: 'vol', 'ang', default: None
     strategy: currently supports 'bo'
     '''
-    def __init__(self, symbol: str, freq: str, 
+    def __init__(self, symbol: str, freq: str,
                  long_window: int, short_window: int, ts_stop: int = None,
                  timeperiod: int = None, multiplier: int = None, threshold: int = None,
                  flag_filter: str = None, flag_ts_stop: bool = False,
@@ -311,7 +309,7 @@ class InspectBoStrategy(InspectStrategy):
         self.inspect()
 
     def _get_strategy(self, strategy):
-        return get_strategy(strategy) 
+        return get_strategy(strategy)
 
     def _get_variables(self, **kwargs):
         if self.flag_ts_stop:
@@ -335,11 +333,11 @@ class InspectBoStrategy(InspectStrategy):
 
 
 def returns_timeline(
-    symbol, freq, 
-    long_window, short_window, 
+    symbol, freq,
+    long_window, short_window,
     strategy,
-    ts_stop=None, 
-    timeperiod=None, multiplier=None, threshold=None, flag_filter=None, 
+    ts_stop=None,
+    timeperiod=None, multiplier=None, threshold=None, flag_filter=None,
     flag_ts_stop=False,
 ):
     ins = InspectBoStrategy(

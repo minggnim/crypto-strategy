@@ -1,14 +1,13 @@
 import os
 import pathlib
+from datetime import datetime
+from abc import ABC, abstractmethod
 import talib
 import numpy as np
 import pandas as pd
-from datetime import datetime
-from numbers import Number
-from abc import ABC, abstractmethod
 from finlab_crypto.indicators import trends
 from finlab_crypto.strategy import Strategy, Filter
-from crypto_strategy.plot import plot_indicators
+from crypto_strategy.reporting.plot import plot_indicators
 from crypto_strategy.data import check_and_create_dir, download_crypto_history
 
 
@@ -20,19 +19,19 @@ def trend_strategy(ohlcv):
     filtered1 = trends[name](ohlcv.close, n1)
     filtered2 = trends[name](ohlcv.close, n2)
     entries = (filtered1 > filtered2) & (filtered1.shift() < filtered2.shift())
-    exit = (filtered1 < filtered2) & (filtered1.shift() > filtered2.shift()) 
+    exits = (filtered1 < filtered2) & (filtered1.shift() > filtered2.shift())
     figures = {
         'overlaps': {
             'trend1': filtered1,
             'trend2': filtered2,
         }
     }
-    return entries, exit, figures
+    return entries, exits, figures
 
 @Strategy(long_window=30, short_window=30)
 def breakout_strategy(ohlcv):
     lw = breakout_strategy.long_window
-    sw = breakout_strategy.short_window    
+    sw = breakout_strategy.short_window
     ub = ohlcv.close.rolling(lw).max()
     lb = ohlcv.close.rolling(sw).min()
     entries = ohlcv.close == ub
@@ -49,9 +48,9 @@ def breakout_strategy(ohlcv):
 @Strategy(fastperiod=12, slowperiod=26, signalperiod=9)
 def macd_strategy(ohlcv):
     macd, signal, macdhist = talib.MACD(
-        ohlcv.close, 
-        fastperiod=macd_strategy.fastperiod, 
-        slowperiod=macd_strategy.slowperiod, 
+        ohlcv.close,
+        fastperiod=macd_strategy.fastperiod,
+        slowperiod=macd_strategy.slowperiod,
         signalperiod=macd_strategy.signalperiod
     )
 
@@ -67,9 +66,9 @@ def macd_strategy(ohlcv):
 @Strategy(fastperiod=12, slowperiod=26, signalperiod=9)
 def macd_strategy_revised(ohlcv):
     macd, signal, macdhist = talib.MACD(
-        ohlcv.close, 
-        fastperiod=macd_strategy.fastperiod, 
-        slowperiod=macd_strategy.slowperiod, 
+        ohlcv.close,
+        fastperiod=macd_strategy.fastperiod,
+        slowperiod=macd_strategy.slowperiod,
         signalperiod=macd_strategy.signalperiod
     )
     entries = (macdhist > 0) & (macdhist.shift() < 0) & (macd > 0)
@@ -136,7 +135,7 @@ def stoch_filter(ohlcv):
     slow = stoch_filter.slow
     matype = stoch_filter.matype
     k, d = talib.STOCH(ohlcv.high, ohlcv.low, ohlcv.close,
-                fastk_period=fast, slowk_period=slow, slowk_matype=matype, 
+                fastk_period=fast, slowk_period=slow, slowk_matype=matype,
                 slowd_period=slow, slowd_matype=matype)
     signals = (k > d) & (k > 50) & (k < 50) if side == 'long' else k < d
     fig = {
@@ -176,7 +175,7 @@ class BestStrategy(ABC):
             raise ValueError(f'The res_dir name should contain {flag_filter} filter')
         if not flag_filter and 'filter' in res_dir:
             raise ValueError(f'The res_dir name should not contain filter name')
-    
+
     @abstractmethod
     def _get_strategy(self, strategy):
         pass
@@ -185,7 +184,7 @@ class BestStrategy(ABC):
     def grid_search_params(self):
         pass
 
-    @abstractmethod 
+    @abstractmethod
     def _get_grid_search(self):
         pass
 
@@ -211,7 +210,7 @@ class BestStrategy(ABC):
             .to_dict(orient='records')
         )
         return best_params
-    
+
     def generate_best_params(self):
         print(f'The search for {self.symbols} starts now')
         for symbol in self.symbols:
@@ -224,12 +223,12 @@ class BestStrategy(ABC):
 
 
 class CheckIndicators(ABC):
-    def __init__(self, 
-                symbols: list, 
-                date: str, 
-                res_dir: str, 
-                flag_filter: str, 
-                strategy: str, 
+    def __init__(self,
+                symbols: list,
+                date: str,
+                res_dir: str,
+                flag_filter: str,
+                strategy: str,
                 show_fig: bool = False):
         self.symbols = symbols
         self.date = date
@@ -241,7 +240,7 @@ class CheckIndicators(ABC):
     @abstractmethod
     def _get_strategy(self, strategy):
         pass
-    
+
     @abstractmethod
     def _get_variables(self):
         pass
@@ -273,11 +272,11 @@ class CheckIndicators(ABC):
 
 
 class InspectStrategy(ABC):
-    def __init__(self, 
-                symbol: str, 
-                freq: str, 
-                flag_filter: str, 
-                strategy: str, 
+    def __init__(self,
+                symbol: str,
+                freq: str,
+                flag_filter: str,
+                strategy: str,
                 show_fig: bool = True):
         self.symbol = symbol
         self.freq = freq
@@ -300,7 +299,7 @@ class InspectStrategy(ABC):
 
     def inspect(self):
         self.portfolio = self.strategy.backtest(
-            self.ohlcv, 
+            self.ohlcv,
             variables=self._get_variables(),
             filters=self._get_filter(),
             freq=self.freq,

@@ -2,12 +2,9 @@ import os
 from collections import defaultdict
 from datetime import datetime
 import pandas as pd
-import seaborn as sns
-import numpy as np
-from crypto_strategy.data import join_path
-from crypto_strategy.plot import plot_returns
+from crypto_strategy.reporting.plot import plot_returns
 from crypto_strategy.strategies.bo_strategy import returns_timeline
-from .reporting_base import GenerateReport, generate_cscv
+from .base import GenerateReport
 
 
 class GenerateMaReport(GenerateReport):
@@ -38,7 +35,7 @@ class GenerateBoReport(GenerateReport):
 
 def generate_report(symbol, res_dir='results/'):
     metrics = [
-        'Total Return [%]', 'Buy & Hold Return [%]', 
+        'Total Return [%]', 'Buy & Hold Return [%]',
         'Num. Trades', 'Win Rate [%]', 'Max. Drawdown [%]', 'Best Trade [%]', 'Worst Trade [%]',
         'Expectancy', 'Sharpe Ratio', 'Sortino Ratio', 'Calmar Ratio',
         'Start', 'End', 'Duration',
@@ -52,7 +49,7 @@ def generate_report(symbol, res_dir='results/'):
             date_folder = sorted([int(f) for f in os.listdir(cur_path) if not f.startswith('.')])
             asset_file = []
             _cur_path = cur_path
-            # handle assets in multiple bases 
+            # handle assets in multiple bases
             while not asset_file and date_folder:
                 cur_path = os.path.join(_cur_path, str(date_folder[-1]))
                 asset_file = [f for f in os.listdir(cur_path) if f.startswith(symbol)]
@@ -100,7 +97,7 @@ def generate_report(symbol, res_dir='results/'):
         f.write(html_file)
 
 
-def reporting_add_rets_timeline(symbol, method_path):    
+def reporting_add_rets_timeline(symbol, method_path):
     if 'bo' in method_path.split('-'):
         strategy = 'bo'
     flag_ts_stop = True if 'ts_stop' in method_path else False
@@ -114,7 +111,7 @@ def reporting_add_rets_timeline(symbol, method_path):
     asset_file = []
     cur_path = method_path
     _cur_path = cur_path
-    # handle assets in multiple bases 
+    # handle assets in multiple bases
     while not asset_file and date_folder:
         cur_path = os.path.join(_cur_path, str(date_folder[-1]))
         asset_file = [f for f in os.listdir(cur_path) if f.startswith(symbol)]
@@ -139,10 +136,10 @@ def reporting_add_rets_timeline(symbol, method_path):
                 timeperiod = int(parts[-2])
                 multiplier = int(parts[-1])
             ret = returns_timeline(
-                symbol, freq, 
-                long_window, short_window, 
-                strategy, ts_stop, 
-                timeperiod, multiplier, threshold, 
+                symbol, freq,
+                long_window, short_window,
+                strategy, ts_stop,
+                timeperiod, multiplier, threshold,
                 flag_filter, flag_ts_stop
                 )
             ser = pd.read_pickle(os.path.join(cur_path, f))

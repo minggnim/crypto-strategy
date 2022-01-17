@@ -1,7 +1,12 @@
+import numpy as np
+import pandas as pd
+import seaborn as sns
 import matplotlib.pyplot as plt
+from crypto_strategy.data import join_path
+from .base import generate_cscv
 
 
-def plot_indicators(portfolio, output_path=None, filename=None, show_fig=False):   
+def plot_indicators(portfolio, output_path=None, filename=None, show_fig=False):
     items = ['final_value', 'sharpe_ratio', 'sortino_ratio']
     fig, axes = plt.subplots(1, len(items), figsize=(15, 3),
                              sharey=False, sharex=False, constrained_layout=False)
@@ -23,7 +28,7 @@ def plot_indicators(portfolio, output_path=None, filename=None, show_fig=False):
         results = pd.DataFrame(results)
         axes[i].title.set_text(item)
         results.plot(ax=axes[i])
-    
+
     if output_path and filename:
         file_diff = join_path(output_path, filename + '-diff.png')
         plt.savefig(file_diff)
@@ -51,7 +56,8 @@ def plot_indicators(portfolio, output_path=None, filename=None, show_fig=False):
 
     # first and second Stochastic dominance
     axes[2].title.set_text('Stochastic dominance')
-    if len(results['dom_df']) != 0: results['dom_df'].plot(ax=axes[2], secondary_y=['SD2'])
+    if len(results['dom_df']) != 0:
+        results['dom_df'].plot(ax=axes[2], secondary_y=['SD2'])
     axes[2].set_xlabel('Performance optimized vs non-optimized')
     axes[2].set_ylabel('Frequency')
 
@@ -60,7 +66,7 @@ def plot_indicators(portfolio, output_path=None, filename=None, show_fig=False):
         plt.savefig(file_cscv)
 
     if show_fig:
-        plt.show();
+        plt.show()
 
 
 def plot_returns(btc_acc_returns, eth_acc_returns, pf_acc_returns, start_date):
@@ -70,4 +76,4 @@ def plot_returns(btc_acc_returns, eth_acc_returns, pf_acc_returns, start_date):
     pf_acc_returns.plot(label='Portfolio')
     ax.legend()
     ax.set_title(f'{start_date}-day Portfolio Return')
-    fig.tight_layout();
+    fig.tight_layout()
