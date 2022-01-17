@@ -1,10 +1,5 @@
-import os
-import pathlib
 import numpy as np
-import pandas as pd
-from datetime import datetime
 from finlab_crypto.indicators import trends
-from finlab_crypto.strategy import Strategy, Filter
 from crypto_strategy.data import download_crypto_history, save_stats
 from .base import (
     trend_strategy,
@@ -18,7 +13,7 @@ RANGE_TIMEPERIOD = np.arange(10, 50, 5)
 RANGE_THRESHOLD = np.arange(0, 25, 5)
 
 
-def create_mmi_filter(flag_filter, **kwargs):
+def create_mmi_filter(**kwargs):
     if kwargs:
         assert kwargs.get('timeperiod'),\
             'mmi fitler doesn\'t have config params provided'
@@ -34,7 +29,7 @@ def create_mmi_filter(flag_filter, **kwargs):
     }
     return filters
 
-def create_ang_filter(flag_filter, **kwargs):
+def create_ang_filter(**kwargs):
     if kwargs:
         assert kwargs.get('timeperiod') and kwargs.get('threshold') is not None,\
             'Angle filter doesn\'t have config params provided'
@@ -58,9 +53,9 @@ def create_ang_filter(flag_filter, **kwargs):
 def get_filter(flag_filter, **kwargs):
     filters = dict()
     if flag_filter == 'mmi':
-        filters = create_mmi_filter(flag_filter, **kwargs)
+        filters = create_mmi_filter(**kwargs)
     if flag_filter == 'ang':
-        filters = create_ang_filter(flag_filter, **kwargs)
+        filters = create_ang_filter(**kwargs)
     return filters
 
 def create_variables(**kwargs):
@@ -89,7 +84,7 @@ class BestMaStrategy(BestStrategy):
     trends: a list of MA strategies, default: trends.keys()
     strategy: strategy name, default: 'ma'
     '''
-    def __init__(self, symbols: list, freq: str, res_dir: str, 
+    def __init__(self, symbols: list, freq: str, res_dir: str,
                  flag_filter: str = None,
                  trends: list = trends.keys(),
                  strategy: str = 'ma'
@@ -100,7 +95,7 @@ class BestMaStrategy(BestStrategy):
 
     def _get_strategy(self, strategy):
         return trend_strategy
-    
+
     def _get_filter(self, **kwargs):
         return get_filter(flag_filter=self.flag_filter, **kwargs)
 
@@ -110,10 +105,9 @@ class BestMaStrategy(BestStrategy):
     def _get_grid_search(self):
         if self.flag_filter == 'mmi':
             return self.grid_search_mmi_params()
-        elif self.flag_filter == 'ang':
+        if self.flag_filter == 'ang':
             return self.grid_search_ang_params()
-        else:
-            return self.grid_search_params()
+        return self.grid_search_params()
 
     def grid_search_params(self):
         variables = self._get_variables(name=self.trends)
@@ -151,7 +145,7 @@ class BestMaStrategy(BestStrategy):
         if self.flag_filter == 'mmi':
             filename += f"{self.flag_filter}-{best_params['mmi_timeperiod']}-{self.date_str}.pkl"
         elif self.flag_filter == 'ang':
-             filename += f"{self.flag_filter}-{best_params['ang_timeperiod']}-{best_params['ang_threshold']}-{self.date_str}.pkl"
+            filename += f"{self.flag_filter}-{best_params['ang_timeperiod']}-{best_params['ang_threshold']}-{self.date_str}.pkl"
         else:
             filename += f"{self.date_str}.pkl"
         save_stats(portfolio.stats(), self.output_path, filename)
@@ -170,7 +164,7 @@ class BestMaStrategy(BestStrategy):
 
 class CheckMaIndicators(CheckIndicators):
     '''
-    This class provides the method to check Partial Differentiation 
+    This class provides the method to check Partial Differentiation
     and Combinatorially Symmetric Cross-validation of MA strategy.
     symbols: a list of symbols to be optimzied on, e.g., ['BTCUSDT']
     date: the date the best params are created
@@ -204,12 +198,12 @@ class InspectMaStrategy(InspectStrategy):
     threshold: param used in ang filter
     flag_fitler: currently supported fitlers: 'mmi', 'ang', default: None
     '''
-    def __init__(self, 
-                symbol: str, freq: str, 
-                name: str, n1: int, n2: int, 
-                timeperiod: int = None, 
+    def __init__(self,
+                symbol: str, freq: str,
+                name: str, n1: int, n2: int,
+                timeperiod: int = None,
                 threshold: int = None,
-                flag_filter: str = None,    
+                flag_filter: str = None,
                 strategy: str = 'ma',
                 show_fig: bool = True
                 ):
@@ -223,12 +217,12 @@ class InspectMaStrategy(InspectStrategy):
         self.inspect()
 
     def _get_strategy(self, strategy):
-        return trend_strategy 
+        return trend_strategy
 
     def _get_variables(self):
         return create_variables(
-            name=self.name, 
-            n1=self.n1, 
+            name=self.name,
+            n1=self.n1,
             n2=self.n2
             )
 

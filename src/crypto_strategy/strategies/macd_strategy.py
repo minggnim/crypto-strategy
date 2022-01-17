@@ -1,13 +1,9 @@
-import os
-import pathlib
 import numpy as np
 import pandas as pd
-from datetime import datetime
 from crypto_strategy.data import download_crypto_history, save_stats
 from .base import (
-    macd_strategy, macd_strategy_revised, 
-    mmi_filter, mmi_filter_ge_half, 
-    ang_filter, stoch_filter, sma_filter, 
+    macd_strategy, macd_strategy_revised,
+    mmi_filter, ang_filter, stoch_filter, sma_filter,
     BestStrategy, InspectStrategy, CheckIndicators
 )
 
@@ -23,13 +19,12 @@ RANGE_SLOW = np.arange(3, 15, 3)
 def get_strategy(strategy):
     if strategy == 'macd':
         return macd_strategy
-    elif strategy == 'macd_rev':
-        return macd_strategy_revised 
-    else:
-        raise ValueError('Strategy not recognized. Please choose from macd and macd_rev')
+    if strategy == 'macd_rev':
+        return macd_strategy_revised
+    raise ValueError('Strategy not recognized. Please choose from macd and macd_rev')
 
 
-def create_mmi_filter(flag_filter, **kwargs):
+def create_mmi_filter(**kwargs):
     if kwargs:
         assert kwargs.get('timeperiod'),\
             'mmi fitler doesn\'t have config params provided'
@@ -45,7 +40,7 @@ def create_mmi_filter(flag_filter, **kwargs):
     }
     return filters
 
-def create_ang_filter(flag_filter, **kwargs):
+def create_ang_filter(**kwargs):
     if kwargs:
         assert kwargs.get('timeperiod') and kwargs.get('threshold') is not None,\
             'Angle filter doesn\'t have config params provided'
@@ -66,7 +61,7 @@ def create_ang_filter(flag_filter, **kwargs):
     }
     return filters
 
-def create_stoch_filter(flag_filter, **kwargs):
+def create_stoch_filter(**kwargs):
     if kwargs:
         assert kwargs.get('fast') and kwargs.get('slow') is not None,\
             'Stoch filter doesn\'t have config params provided'
@@ -87,7 +82,7 @@ def create_stoch_filter(flag_filter, **kwargs):
     }
     return filters
 
-def create_sma_filter(flag_filter, **kwargs):
+def create_sma_filter(**kwargs):
     if kwargs:
         assert kwargs.get('timeperiod') is not None,\
             'SMA filter doesn\'t have config params provided'
@@ -108,13 +103,13 @@ def create_sma_filter(flag_filter, **kwargs):
 def get_filter(flag_filter, **kwargs):
     filters = dict()
     if flag_filter == 'mmi':
-        filters = create_mmi_filter(flag_filter, **kwargs)
+        filters = create_mmi_filter(**kwargs)
     if flag_filter == 'ang':
-        filters = create_ang_filter(flag_filter, **kwargs)
+        filters = create_ang_filter(**kwargs)
     if flag_filter == 'stoch':
-        filters = create_stoch_filter(flag_filter, **kwargs)
+        filters = create_stoch_filter(**kwargs)
     if flag_filter == 'sma':
-        filters = create_sma_filter(flag_filter, **kwargs)
+        filters = create_sma_filter(**kwargs)
     return filters
 
 def create_variables(**kwargs):
@@ -138,7 +133,7 @@ class BestMacdStrategy(BestStrategy):
     trends: a list of MA strategies, default: trends.keys()
     strategy: currently supported strategies: 'macd', 'macd_rev', default: 'macd'
     '''
-    def __init__(self, symbols: list, freq: str, res_dir: str, 
+    def __init__(self, symbols: list, freq: str, res_dir: str,
                  flag_filter: str = None,
                  strategy: str = 'macd'
                  ):
@@ -147,13 +142,13 @@ class BestMacdStrategy(BestStrategy):
 
     def _get_strategy(self, strategy):
         return get_strategy(strategy)
-    
+
     def _get_filter(self, **kwargs):
         return get_filter(flag_filter=self.flag_filter, **kwargs)
 
     def _get_variables(self, **kwargs):
         return create_variables(**kwargs)
-    
+
     def get_best_params(self, total_best_params, n=10):
         total_best_params = (
             pd.DataFrame(total_best_params)
@@ -166,14 +161,13 @@ class BestMacdStrategy(BestStrategy):
     def _get_grid_search(self):
         if self.flag_filter == 'mmi':
             return self.grid_search_mmi_params()
-        elif self.flag_filter == 'ang':
+        if self.flag_filter == 'ang':
             return self.grid_search_ang_params()
-        elif self.flag_filter == 'stoch':
+        if self.flag_filter == 'stoch':
             return self.grid_search_stoch_params()
-        elif self.flag_filter == 'sma':
+        if self.flag_filter == 'sma':
             return self.grid_search_sma_params()
-        else:
-            return self.grid_search_params()
+        return self.grid_search_params()
 
     def grid_search_params(self):
         variables = self._get_variables()
@@ -237,9 +231,9 @@ class BestMacdStrategy(BestStrategy):
         if self.flag_filter == 'mmi':
             filename += f"{self.flag_filter}-{best_params['mmi_timeperiod']}-{self.date_str}.pkl"
         elif self.flag_filter == 'ang':
-             filename += f"{self.flag_filter}-{best_params['ang_timeperiod']}-{best_params['ang_threshold']}-{self.date_str}.pkl"
+            filename += f"{self.flag_filter}-{best_params['ang_timeperiod']}-{best_params['ang_threshold']}-{self.date_str}.pkl"
         elif self.flag_filter == 'stoch':
-             filename += f"{self.flag_filter}-{best_params['stoch_fast']}-{best_params['stoch_slow']}-{self.date_str}.pkl"
+            filename += f"{self.flag_filter}-{best_params['stoch_fast']}-{best_params['stoch_slow']}-{self.date_str}.pkl"
         elif self.flag_filter == 'sma':
             filename += f"{self.flag_filter}-{best_params['sma_timeperiod']}-{self.date_str}.pkl"
         else:
@@ -260,7 +254,7 @@ class BestMacdStrategy(BestStrategy):
 
 class CheckMacdIndicators(CheckIndicators):
     '''
-    This class provides the method to check Partial Differentiation 
+    This class provides the method to check Partial Differentiation
     and Combinatorially Symmetric Cross-validation of MACD strategy
     symbols: a list of symbols to be optimzied on, e.g., ['BTCUSDT']
     date: the date the best params are created
@@ -293,17 +287,17 @@ class InspectMacdStrategy(InspectStrategy):
     timeperiod, threshold, fast, slow: params used in filters
     flag_fitler: currently supported fitlers: 'mmi', 'ang', 'stoch', 'sma', default: None
     '''
-    def __init__(self, 
-                symbol: str, 
-                freq: str, 
-                fastperiod: int, 
+    def __init__(self,
+                symbol: str,
+                freq: str,
+                fastperiod: int,
                 slowperiod: int,
                 signalperiod: int,
-                timeperiod: int = None, 
+                timeperiod: int = None,
                 threshold: int = None,
                 fast: int = None,
                 slow: int = None,
-                flag_filter: str = None,    
+                flag_filter: str = None,
                 strategy: str = 'macd',
                 show_fig: bool = True
                 ):
@@ -319,12 +313,12 @@ class InspectMacdStrategy(InspectStrategy):
         self.inspect()
 
     def _get_strategy(self, strategy):
-        return get_strategy(strategy) 
+        return get_strategy(strategy)
 
     def _get_variables(self):
         return create_variables(
             fastperiod=self.fastperiod,
-            slowperiod=self.slowperiod, 
+            slowperiod=self.slowperiod,
             signalperiod=self.signalperiod
             )
 
