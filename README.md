@@ -8,8 +8,12 @@
 A repo to create trading strategies for cryptocurrencies.
 
 ## Install
-
+```
 pip install crypto-strategy[full]
+```
 
 ## Usage
 
+
+## Tests
+pytest
