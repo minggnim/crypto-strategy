@@ -1,9 +1,0 @@
-numba
-numpy
-pandas
-ta-lib
-vectorbt
-python-binance
-tqdm
-seaborn
-pyecharts
