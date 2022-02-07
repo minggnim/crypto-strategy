@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from finlab_crypto.indicators import trends
 from crypto_strategy.data import download_crypto_history, save_stats
 from .base import (
@@ -11,6 +12,7 @@ from .base import (
 RANGE_WINDOW = np.arange(30, 300, 10)
 RANGE_TIMEPERIOD = np.arange(10, 50, 5)
 RANGE_THRESHOLD = np.arange(0, 25, 5)
+RANGE_TS_STOP = np.arange(0.1, 0.6, 0.05)
 
 
 def create_mmi_filter(**kwargs):
@@ -77,6 +79,33 @@ def create_variables(**kwargs):
     return variables
 
 
+def create_variables_ts_stop(**kwargs):
+    name = kwargs.get('name')
+    if name:
+        variables = dict(name=name)
+    else:
+        raise ValueError('The name of the MA strategy is required')
+    if kwargs.get('n1') and kwargs.get('n2') and kwargs.get('ts_stop'):
+        variables.update(kwargs)
+    elif not (kwargs.get('n1') or kwargs.get('n2') or kwargs.get('ts_stop')):
+        variables['n1'] = RANGE_WINDOW
+        variables['n2'] = RANGE_WINDOW
+        variables['ts_stop'] = RANGE_TS_STOP
+    else:
+        raise ValueError('The MA strategy does\'t have the config params provided')
+    return variables
+
+
+def get_acc_returns(daily_returns):
+    acc_returns = {
+        'Ret [:21-04-14]': (daily_returns[:'2021-04-15'] + 1).cumprod()[-1],
+        'Ret [21-04-15:21-07-20]': (daily_returns['2021-04-15':'2021-07-21'] + 1).cumprod()[-1],
+        'Ret [21-07-21:21-11-10]': (daily_returns['2021-07-21':'2021-11-11'] + 1).cumprod()[-1],
+        'Ret [21-11-11:]': (daily_returns['2021-11-11':] + 1).cumprod()[-1]
+    }
+    return acc_returns
+
+
 class BestMaStrategy(BestStrategy):
     '''
     This class provides the method to optimize the MA strategy
@@ -89,11 +118,13 @@ class BestMaStrategy(BestStrategy):
     '''
     def __init__(self, symbols: list, freq: str, res_dir: str,
                  flag_filter: str = None,
+                 flag_ts_stop: bool = False,
                  trends: list = trends.keys(),
                  strategy: str = 'ma'
                  ):
         super().__init__(symbols, freq, res_dir, flag_filter, strategy)
         self.trends = trends
+        self.flag_ts_stop = flag_ts_stop
         self.generate_best_params()
 
     def _get_strategy(self, strategy):
@@ -103,6 +134,8 @@ class BestMaStrategy(BestStrategy):
         return get_filter(flag_filter=self.flag_filter, **kwargs)
 
     def _get_variables(self, **kwargs):
+        if self.flag_ts_stop:
+            return create_variables_ts_stop(**kwargs)
         return create_variables(**kwargs)
 
     def _get_grid_search(self):
@@ -112,6 +145,30 @@ class BestMaStrategy(BestStrategy):
             return self.grid_search_ang_params()
         return self.grid_search_params()
 
+    def get_best_params(self, total_best_params, n=10):
+        total_best_params = pd.DataFrame(total_best_params)
+        total_best_params['sharpe'] = (total_best_params['sharpe'] + 0.05).round(1)
+        total_best_params['gap'] = total_best_params['n2'] - total_best_params['n1']
+        if 'ohlcstx_sl_stop' in total_best_params.columns:
+            total_best_params = (
+                total_best_params
+                .query('gap > 0')
+                .sort_values(
+                    by=['sharpe', 'gap', 'n1', 'ohlcstx_sl_stop'],
+                    ascending=[True, True, False, False])
+            )
+        else:
+            total_best_params = (
+                total_best_params
+                .query('gap > 0')
+                .sort_values(
+                    by=['sharpe', 'gap', 'n1'],
+                    ascending=[True, True, False]
+                    )
+            )
+        print(total_best_params)
+        return total_best_params.tail(1).to_dict(orient='records')[0] if not total_best_params.empty else None
+    
     def grid_search_params(self):
         variables = self._get_variables(name=self.trends)
         best_params = self.backtest(variables)
@@ -137,20 +194,37 @@ class BestMaStrategy(BestStrategy):
         return self.get_best_params(total_best_params)
 
     def apply_best_params(self, best_params, symbol):
-        variables = self._get_variables(name=best_params['name'], n1=best_params['n1'], n2=best_params['n2'])
+        if self.flag_ts_stop:
+            variables = self._get_variables(
+                name=best_params['name'], 
+                n1=best_params['n1'], 
+                n2=best_params['n2'],
+                ts_stop=best_params['ohlcstx_sl_stop']
+            )
+        else:
+            variables = self._get_variables(
+                name=best_params['name'], 
+                n1=best_params['n1'], 
+                n2=best_params['n2']
+            )
         filters = self._get_filter(
             timeperiod=best_params.get('mmi_timeperiod') or best_params.get('ang_timeperiod'),
             threshold=best_params.get('ang_threshold')
             )
         portfolio = self.strategy.backtest(self.ohlcv, variables=variables, filters=filters, freq=self.freq)
         filename = f"{symbol}-{self.freq}-{best_params['name']}-{best_params['n1']}-{best_params['n2']}-"
+        if self.flag_ts_stop:
+            filename += f'''ts-{best_params['ohlcstx_sl_stop']:.2f}-'''
         if self.flag_filter == 'mmi':
             filename += f"{self.flag_filter}-{best_params['mmi_timeperiod']}-{self.date_str}.pkl"
         elif self.flag_filter == 'ang':
             filename += f"{self.flag_filter}-{best_params['ang_timeperiod']}-{best_params['ang_threshold']}-{self.date_str}.pkl"
         else:
             filename += f"{self.date_str}.pkl"
-        save_stats(portfolio.stats(), self.output_path, filename)
+        acc_returns = get_acc_returns(portfolio.daily_returns())
+        stats = portfolio.stats()
+        stats = stats.append(pd.Series(acc_returns))
+        save_stats(stats, self.output_path, filename)
         print(f'The stats are saved to {self.output_path}/{filename}')
 
     def generate_best_params(self):
@@ -174,8 +248,13 @@ class CheckMaIndicators(CheckIndicators):
     name: the name of the MA strategy
     flag_fitler: currently supported fitlers: 'mmi', 'ang', default: None
     '''
-    def __init__(self, symbols: list, date: str, res_dir: str,
-                 flag_filter: str = None, strategy: str = 'ma'
+    def __init__(self, 
+                 symbols: list, 
+                 date: str, 
+                 res_dir: str,
+                 flag_filter: str = None,
+                 flag_ts_stop: bool = False,
+                 strategy: str = 'ma'
                  ):
         super().__init__(symbols, date, res_dir, flag_filter, strategy)
         self.check_indicators()
@@ -184,6 +263,8 @@ class CheckMaIndicators(CheckIndicators):
         return trend_strategy
 
     def _get_variables(self, **kwargs):
+        if self.flag_ts_stop:
+            return create_variables_ts_stop(**kwargs)
         return create_variables(**kwargs)
 
     def _get_filter(self, **kwargs):
@@ -206,6 +287,8 @@ class InspectMaStrategy(InspectStrategy):
                  timeperiod: int = None,
                  threshold: int = None,
                  flag_filter: str = None,
+                 flag_ts_stop: bool = False,
+                 ts_stop: int = None,
                  strategy: str = 'ma',
                  show_fig: bool = True
                  ):
@@ -216,12 +299,21 @@ class InspectMaStrategy(InspectStrategy):
         self.timeperiod = timeperiod
         self.threshold = threshold
         self.flag_filter = flag_filter
+        self.flag_ts_stop = flag_ts_stop
+        self.ts_stop = ts_stop
         self.inspect()
 
     def _get_strategy(self, strategy):
         return trend_strategy
 
     def _get_variables(self):
+        if self.flag_ts_stop:
+            return create_variables_ts_stop(
+                name=self.name,
+                n1=self.n1,
+                n2=self.n2,
+                ts_stop=self.ts_stop
+            )
         return create_variables(
             name=self.name,
             n1=self.n1,

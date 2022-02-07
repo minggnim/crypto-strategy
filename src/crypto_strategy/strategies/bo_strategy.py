@@ -98,7 +98,7 @@ def create_bo_variables(**kwargs):
 
 def create_bo_variables_ts_stop(**kwargs):
     if kwargs:
-        assert kwargs.get('long_window') and kwargs.get('short_window') and kwargs.get('ts_stop'), \
+        assert kwargs.get('long_window') and kwargs.get('short_window') and kwargs.get('ts_stop'),\
             'BO strategy doesn\'t have config params provided'
         variables = dict(
             long_window=kwargs['long_window'],
@@ -156,12 +156,12 @@ class BestBoStrategy(BestStrategy):
         total_best_params = pd.DataFrame(total_best_params)
         total_best_params['sharpe'] = (total_best_params['sharpe'] + 0.05).round(1)
         total_best_params['gap'] = total_best_params['long_window'] - total_best_params['short_window']
-        if 'advstex_ts_stop' in total_best_params.columns:
+        if 'ohlcstx_sl_stop' in total_best_params.columns:
             total_best_params = (
                 total_best_params
                 .query('gap > 0')
                 .sort_values(
-                    by=['sharpe', 'gap', 'short_window', 'advstex_ts_stop'],
+                    by=['sharpe', 'gap', 'short_window', 'ohlcstx_sl_stop'],
                     ascending=[True, True, False, False])
             )
         else:
@@ -173,7 +173,6 @@ class BestBoStrategy(BestStrategy):
                     ascending=[True, True, False]
                     )
             )
-
         print(total_best_params)
         return total_best_params.tail(1).to_dict(orient='records')[0] if not total_best_params.empty else None
 
@@ -207,7 +206,7 @@ class BestBoStrategy(BestStrategy):
             variables = self._get_variables(
                 long_window=best_params['long_window'],
                 short_window=best_params['short_window'],
-                ts_stop=best_params['advstex_ts_stop']
+                ts_stop=best_params['ohlcstx_sl_stop']
             )
         else:
             variables = self._get_variables(
@@ -222,7 +221,7 @@ class BestBoStrategy(BestStrategy):
         portfolio = self.strategy.backtest(self.ohlcv, freq=self.freq, variables=variables, filters=filters)
         filename = f'''{symbol}-{self.freq}-{self.strategy_name}-{best_params['long_window']}-{best_params['short_window']}-'''
         if self.flag_ts_stop:
-            filename += f'''ts-{best_params['advstex_ts_stop']:.2f}-'''
+            filename += f'''ts-{best_params['ohlcstx_sl_stop']:.2f}-'''
         if self.flag_filter == 'vol':
             filename += f'''{self.flag_filter}-{best_params['vol_timeperiod']}-{best_params['vol_multiplier']}-{self.date_str}.pkl'''
         elif self.flag_filter == 'ang':
