@@ -119,12 +119,14 @@ class BestMaStrategy(BestStrategy):
     def __init__(self, symbols: list, freq: str, res_dir: str,
                  flag_filter: str = None,
                  flag_ts_stop: bool = False,
+                 flag_acc_return: bool = True,
                  trends: list = trends.keys(),
                  strategy: str = 'ma'
                  ):
         super().__init__(symbols, freq, res_dir, flag_filter, strategy)
         self.trends = trends
         self.flag_ts_stop = flag_ts_stop
+        self.flag_acc_return = flag_acc_return
         self.generate_best_params()
 
     def _get_strategy(self, strategy):
@@ -211,7 +213,6 @@ class BestMaStrategy(BestStrategy):
             timeperiod=best_params.get('mmi_timeperiod') or best_params.get('ang_timeperiod'),
             threshold=best_params.get('ang_threshold')
             )
-        portfolio = self.strategy.backtest(self.ohlcv, variables=variables, filters=filters, freq=self.freq)
         filename = f"{symbol}-{self.freq}-{best_params['name']}-{best_params['n1']}-{best_params['n2']}-"
         if self.flag_ts_stop:
             filename += f'''ts-{best_params['ohlcstx_sl_stop']:.2f}-'''
@@ -221,9 +222,11 @@ class BestMaStrategy(BestStrategy):
             filename += f"{self.flag_filter}-{best_params['ang_timeperiod']}-{best_params['ang_threshold']}-{self.date_str}.pkl"
         else:
             filename += f"{self.date_str}.pkl"
-        acc_returns = get_acc_returns(portfolio.daily_returns())
+        portfolio = self.strategy.backtest(self.ohlcv, variables=variables, filters=filters, freq=self.freq)
         stats = portfolio.stats()
-        stats = stats.append(pd.Series(acc_returns))
+        if self.flag_acc_return:
+            acc_returns = get_acc_returns(portfolio.daily_returns())
+            stats = stats.append(pd.Series(acc_returns))
         save_stats(stats, self.output_path, filename)
         print(f'The stats are saved to {self.output_path}/{filename}')
 

@@ -127,10 +127,12 @@ class BestBoStrategy(BestStrategy):
     def __init__(self, symbols: list, freq: str, res_dir: str,
                  flag_filter: str = None,
                  flag_ts_stop: bool = False,
+                 flag_acc_return: bool = True,
                  strategy: str = 'bo',
                  ):
         super().__init__(symbols, freq, res_dir, flag_filter, strategy)
         self.flag_ts_stop = flag_ts_stop
+        self.flag_acc_return = flag_acc_return
         self.generate_best_params()
 
     def _get_strategy(self, strategy):
@@ -218,7 +220,6 @@ class BestBoStrategy(BestStrategy):
             multiplier=best_params.get('vol_multiplier'),
             threshold=best_params.get('ang_threshold')
             )
-        portfolio = self.strategy.backtest(self.ohlcv, freq=self.freq, variables=variables, filters=filters)
         filename = f'''{symbol}-{self.freq}-{self.strategy_name}-{best_params['long_window']}-{best_params['short_window']}-'''
         if self.flag_ts_stop:
             filename += f'''ts-{best_params['ohlcstx_sl_stop']:.2f}-'''
@@ -228,8 +229,14 @@ class BestBoStrategy(BestStrategy):
             filename += f'''{self.flag_filter}-{best_params['ang_timeperiod']}-{best_params['ang_threshold']}-{self.date_str}.pkl'''
         else:
             filename += f'''{self.date_str}.pkl'''
+        portfolio = self.strategy.backtest(self.ohlcv, freq=self.freq, variables=variables, filters=filters)
+        stats = portfolio.stats()
+        if self.flag_acc_return:
+            acc_returns = get_acc_returns(portfolio.daily_returns())
+            stats = stats.append(pd.Series(acc_returns))
         filename = os.path.join(self.output_path, filename)
-        portfolio.stats().to_pickle(filename)
+        save_stats(stats, self.output_path, filename)
+        print(f'The stats are saved to {self.output_path}/{filename}')
 
     def generate_best_params(self):
         print(f'The search for {self.symbols} starts now')
