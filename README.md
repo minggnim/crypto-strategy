@@ -16,7 +16,7 @@ pip install crypto-strategy[full]
 ## Usage
 1. Moving average strategy
 ```
-BestMaStrategy(symbols, freq, res_dir, flag_filter)
+BestMaStrategy(symbols, freq, res_dir, flag_filter, flag_ts_stop)
 ```
 - symbols: asset name, e.g., BTCUSDT
 - freq: data frequency to use, 1h | 4h
@@ -24,6 +24,8 @@ BestMaStrategy(symbols, freq, res_dir, flag_filter)
 - flag_filter: filter to use, [mmi | ang]
     - mmi: Market Meanness Index filter
     - ang: Linear Regression Angle filter
+- flag_ts_stop: trailing stop filter
+
 
 2. Breakout strategy
 ```
