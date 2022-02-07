@@ -1,13 +1,17 @@
+import os
 import numpy as np
 import pandas as pd
 from finlab_crypto.online import TradingPortfolio
 
 
-def create_trading_portfolio(trading_methods: list, key_file='binance.key'):
-    with open(key_file, 'r') as f:
-        key = f.readline().strip()
-        secret = f.readline()
-    tp = TradingPortfolio(key, secret)
+def create_trading_portfolio(trading_methods: list, key=None, secret=None):
+    if not (key and secret):
+        key = os.environ.get('KEY')
+        secret = os.environ.get('SECRET')
+    if key and secret:
+        tp = TradingPortfolio(key, secret)
+    else:
+        raise ValueError('No trading KEY or SECRET provided')
     if trading_methods:
         for tm in trading_methods:
             tp.register(tm)
