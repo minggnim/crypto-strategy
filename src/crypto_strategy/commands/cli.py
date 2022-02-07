@@ -48,7 +48,7 @@ def best_ma_strategy(symbol, freq, res_dir, flag_filter, flag_ts_stop):
 @click.option('--res_dir', '-r', required=True, type=str, help='directory for outputs')
 @click.option('--flag_filter', '-g', type=str, default=None, show_default=True, help='flag to use, mmi | ang')
 @click.option('--flag_ts_stop', '-t', is_flag=True, help='ts_stop flag')
-def check_ma_indicators(symbol, date, res_dir, flag_filter, ):
+def check_ma_indicators(symbol, date, res_dir, flag_filter, flag_ts_stop):
     parts = res_dir.split('-')
     if (flag_filter and flag_filter not in parts) or (not flag_filter and 'filter' in parts):
         raise ValueError('Mismatch found in filter setting and output dir')
@@ -92,7 +92,7 @@ def best_bo_strategy(symbol, freq, res_dir, flag_filter, flag_ts_stop):
 @click.option('--res_dir', '-r', required=True, type=str, help="directory for outputs")
 @click.option('--flag_filter', '-g', type=str, default=None, show_default=True, help='filter to use, vol | ang')
 @click.option('--flag_ts_stop', '-t', is_flag=True, help='ts_stop flag')
-def check_bo_indicators(symbol, date, res_dir, flag_filter):
+def check_bo_indicators(symbol, date, res_dir, flag_filter, flag_ts_stop):
     parts = res_dir.split('-')
     if (flag_filter and flag_filter not in parts) or (not flag_filter and 'filter' in parts):
         raise ValueError('Mismatch found in filter setting and output dir')

@@ -1,7 +1,11 @@
 import os
 import numpy as np
 import pandas as pd
-from crypto_strategy.data import download_crypto_history
+from crypto_strategy.data import (
+    save_stats,
+    get_acc_returns,
+    download_crypto_history
+)
 from .base import (
     breakout_strategy,
     vol_filter, ang_filter,

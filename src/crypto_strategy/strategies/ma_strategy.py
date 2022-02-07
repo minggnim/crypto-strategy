@@ -1,7 +1,11 @@
 import numpy as np
 import pandas as pd
 from finlab_crypto.indicators import trends
-from crypto_strategy.data import download_crypto_history, save_stats
+from crypto_strategy.data import (
+    save_stats,
+    get_acc_returns,
+    download_crypto_history
+)
 from .base import (
     trend_strategy,
     mmi_filter, ang_filter,
@@ -96,16 +100,6 @@ def create_variables_ts_stop(**kwargs):
     return variables
 
 
-def get_acc_returns(daily_returns):
-    acc_returns = {
-        'Ret [:21-04-14]': (daily_returns[:'2021-04-15'] + 1).cumprod()[-1],
-        'Ret [21-04-15:21-07-20]': (daily_returns['2021-04-15':'2021-07-21'] + 1).cumprod()[-1],
-        'Ret [21-07-21:21-11-10]': (daily_returns['2021-07-21':'2021-11-11'] + 1).cumprod()[-1],
-        'Ret [21-11-11:]': (daily_returns['2021-11-11':] + 1).cumprod()[-1]
-    }
-    return acc_returns
-
-
 class BestMaStrategy(BestStrategy):
     '''
     This class provides the method to optimize the MA strategy
@@ -170,7 +164,7 @@ class BestMaStrategy(BestStrategy):
             )
         print(total_best_params)
         return total_best_params.tail(1).to_dict(orient='records')[0] if not total_best_params.empty else None
-    
+
     def grid_search_params(self):
         variables = self._get_variables(name=self.trends)
         best_params = self.backtest(variables)
@@ -198,15 +192,15 @@ class BestMaStrategy(BestStrategy):
     def apply_best_params(self, best_params, symbol):
         if self.flag_ts_stop:
             variables = self._get_variables(
-                name=best_params['name'], 
-                n1=best_params['n1'], 
+                name=best_params['name'],
+                n1=best_params['n1'],
                 n2=best_params['n2'],
                 ts_stop=best_params['ohlcstx_sl_stop']
             )
         else:
             variables = self._get_variables(
-                name=best_params['name'], 
-                n1=best_params['n1'], 
+                name=best_params['name'],
+                n1=best_params['n1'],
                 n2=best_params['n2']
             )
         filters = self._get_filter(
@@ -251,9 +245,9 @@ class CheckMaIndicators(CheckIndicators):
     name: the name of the MA strategy
     flag_fitler: currently supported fitlers: 'mmi', 'ang', default: None
     '''
-    def __init__(self, 
-                 symbols: list, 
-                 date: str, 
+    def __init__(self,
+                 symbols: list,
+                 date: str,
                  res_dir: str,
                  flag_filter: str = None,
                  flag_ts_stop: bool = False,

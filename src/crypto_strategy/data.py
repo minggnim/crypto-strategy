@@ -9,6 +9,16 @@ def save_stats(stats: pd.DataFrame, output_path, filename) -> None:
     stats.to_pickle(filename)
 
 
+def get_acc_returns(daily_returns):
+    acc_returns = {
+        'Ret [:21-04-14]': (daily_returns[:'2021-04-15'] + 1).cumprod()[-1],
+        'Ret [21-04-15:21-07-20]': (daily_returns['2021-04-15':'2021-07-21'] + 1).cumprod()[-1],
+        'Ret [21-07-21:21-11-10]': (daily_returns['2021-07-21':'2021-11-11'] + 1).cumprod()[-1],
+        'Ret [21-11-11:]': (daily_returns['2021-11-11':] + 1).cumprod()[-1]
+    }
+    return acc_returns
+
+
 def check_and_create_dir(dname, *args) -> str:
     dname = os.path.join(dname, *args)
     has_dir = os.path.isdir(dname)
