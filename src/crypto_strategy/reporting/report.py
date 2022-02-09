@@ -156,10 +156,10 @@ def portfolio_returns(start_date, btc_ohlcv, eth_ohlcv, pf_daily_returns):
         # print(f'{start_date}-Day Portfolio Returns')
         start = -start_date
     # BTC | ETH Buy & Hold
-    btc_daily_returns = btc_ohlcv[start:].close.pct_change()
+    btc_daily_returns = btc_ohlcv[start:].close.pct_change().fillna(0)
     btc_acc_returns = (btc_daily_returns + 1).cumprod()
     # print(f'''BTC: {btc_acc_returns.last('1D') - 1}''')
-    eth_daily_returns = eth_ohlcv[start:].close.pct_change()
+    eth_daily_returns = eth_ohlcv[start:].close.pct_change().fillna(0)
     eth_acc_returns = (eth_daily_returns + 1).cumprod()
     # print(f'''ETH: {eth_acc_returns.last('1D') - 1}''')
     # Portfolio Returns
