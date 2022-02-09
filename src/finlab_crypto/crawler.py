@@ -2,14 +2,19 @@ import json
 import time
 import math
 import requests
+import warnings
 import os.path
 from binance.client import Client
 from datetime import timedelta, datetime, timezone
 from dateutil import parser
 from tqdm import tqdm_notebook  # (Optional, used for progress-bars)
-
-
 import pandas as pd
+
+
+warnings.filterwarnings(
+    "ignore",
+    message="The localize method is no longer necessary, as this time zone supports the fold attribute",
+)
 
 
 binsizes = {"1m": 1, "5m": 5, '15m': 15, '30m': 30, "1h": 60, '2h': 120, "4h": 240, "1d": 1440}
