@@ -163,7 +163,7 @@ def portfolio_returns(start_date, btc_ohlcv, eth_ohlcv, pf_daily_returns):
     eth_acc_returns = (eth_daily_returns + 1).cumprod()
     # print(f'''ETH: {eth_acc_returns.last('1D') - 1}''')
     # Portfolio Returns
-    pf_daily_returns = pf_daily_returns[start:]
+    pf_daily_returns = pf_daily_returns[start:].copy()
     pf_daily_returns.iloc[0] = 0
     pf_acc_returns = (pf_daily_returns + 1).cumprod().mean(axis=1)
     # print(f'''Portfolio: {pf_acc_returns.tail(1) - 1}''')
