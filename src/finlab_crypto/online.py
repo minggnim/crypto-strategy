@@ -385,7 +385,7 @@ class TradingPortfolio():
         position = position[position.index.str[:2] != 'LD']
 
         # refine asset index
-        all_assets = base_asset_value.index | quote_asset_value.index | position.index
+        all_assets = base_asset_value.index.union(quote_asset_value.index).union(position.index)
 
         base_asset_value = base_asset_value.reindex(all_assets).fillna(0)
         quote_asset_value = quote_asset_value.reindex(all_assets).fillna(0)
