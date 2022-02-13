@@ -94,7 +94,7 @@ def migrate_stop_vars(stop_vars):
     if 'ts_stop' in stop_vars:
         stop_vars['sl_stop'] = stop_vars['ts_stop']
         stop_vars['sl_trail'] = [s > 0 for s in stop_vars['ts_stop']]
-    if 'sl_stop' in stop_vars:
+    elif 'sl_stop' in stop_vars:
         stop_vars['sl_trail'] = [s < 0 for s in stop_vars['sl_stop']]
     return stop_vars
 
@@ -124,9 +124,9 @@ def stop_early(ohlcv, entries, exits, stop_vars, enumeration=True):
         stop_vars = enumerate_variables(stop_vars)
         stop_vars = {key: [stop_vars[i][key] for i in range(len(stop_vars))] for key in stop_vars[0].keys()}
 
-    stop_vars = migrate_stop_vars(stop_vars)
-    
-    import pds; pdb.set_trace()
+    import pdb; pdb.set_trace()
+
+    # stop_vars = migrate_stop_vars(stop_vars)
 
     ohlcstx = vbt.OHLCSTX.run(
         entries,
@@ -137,8 +137,6 @@ def stop_early(ohlcv, entries, exits, stop_vars, enumeration=True):
         **stop_vars,
     )
     stop_exits = ohlcstx.exits
-
-    # import pdb; pdb.set_trace()
 
     nrepeat = int(len(stop_exits.columns) / len(entries.columns))
     if isinstance(stop_exits, pd.DataFrame):
