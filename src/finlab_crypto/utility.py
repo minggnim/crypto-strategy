@@ -89,11 +89,13 @@ def enumerate_signal(ohlcv, strategy, variables, ):
     return entries, exits, fig
 
 
-def migrate_trailing_stop(stop_vars):
+def migrate_stop_vars(stop_vars):
     # to support OHLCSTX upgrade
     if 'ts_stop' in stop_vars:
         stop_vars['sl_stop'] = stop_vars['ts_stop']
         stop_vars['sl_trail'] = [s > 0 for s in stop_vars['ts_stop']]
+    if 'sl_stop' in stop_vars:
+        stop_vars['sl_trail'] = [s < 0 for s in stop_vars['sl_stop']]
     return stop_vars
 
 
@@ -122,7 +124,9 @@ def stop_early(ohlcv, entries, exits, stop_vars, enumeration=True):
         stop_vars = enumerate_variables(stop_vars)
         stop_vars = {key: [stop_vars[i][key] for i in range(len(stop_vars))] for key in stop_vars[0].keys()}
 
-    stop_vars = migrate_trailing_stop(stop_vars)
+    stop_vars = migrate_stop_vars(stop_vars)
+    
+    import pds; pdb.set_trace()
 
     ohlcstx = vbt.OHLCSTX.run(
         entries,

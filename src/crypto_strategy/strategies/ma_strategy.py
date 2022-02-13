@@ -16,7 +16,7 @@ from .base import (
 RANGE_WINDOW = np.arange(30, 300, 10)
 RANGE_TIMEPERIOD = np.arange(10, 50, 5)
 RANGE_THRESHOLD = np.arange(0, 25, 5)
-RANGE_TS_STOP = np.arange(0.1, 0.6, 0.05)
+RANGE_STOP = np.arange(0.1, 0.6, 0.05)
 
 
 def create_mmi_filter(**kwargs):
@@ -83,18 +83,20 @@ def create_variables(**kwargs):
     return variables
 
 
-def create_variables_ts_stop(**kwargs):
+def create_variables_with_stop(flag_stop, **kwargs):
     name = kwargs.get('name')
     if name:
         variables = dict(name=name)
     else:
         raise ValueError('The name of the MA strategy is required')
-    if kwargs.get('n1') and kwargs.get('n2') and kwargs.get('ts_stop'):
+    if flag_stop not in ['ts_stop', 'sl_stop', 'tp_stop']:
+        raise ValueError('The value of flag_stop is not supported')
+    if kwargs.get('n1') and kwargs.get('n2') and kwargs.get(flag_stop):
         variables.update(kwargs)
-    elif not (kwargs.get('n1') or kwargs.get('n2') or kwargs.get('ts_stop')):
+    elif not (kwargs.get('n1') or kwargs.get('n2') or kwargs.get(flag_stop)):
         variables['n1'] = RANGE_WINDOW
         variables['n2'] = RANGE_WINDOW
-        variables['ts_stop'] = RANGE_TS_STOP
+        variables[flag_stop] = RANGE_STOP
     else:
         raise ValueError('The MA strategy does\'t have the config params provided')
     return variables
@@ -106,20 +108,21 @@ class BestMaStrategy(BestStrategy):
     symbols: a list of symbols to be optimzied on, e.g., ['BTCUSDT']
     freq: currently supported values are '1h' or '4h'
     res_dir: the output directory
-    flag_fitler: currently supported fitlers: 'mmi', 'ang', default: None
+    flag_filter: flag to specify filters, currently support 'mmi', 'ang', default None
+    flag_stop: flag to specify early stop, currently support 'ts_stop', 'sl_stop', 'tp_stop', default None
     trends: a list of MA strategies, default: trends.keys()
     strategy: strategy name, default: 'ma'
     '''
     def __init__(self, symbols: list, freq: str, res_dir: str,
                  flag_filter: str = None,
-                 flag_ts_stop: bool = False,
+                 flag_stop: str = None,
                  flag_acc_return: bool = True,
                  trends: list = trends.keys(),
                  strategy: str = 'ma'
                  ):
         super().__init__(symbols, freq, res_dir, flag_filter, strategy)
         self.trends = trends
-        self.flag_ts_stop = flag_ts_stop
+        self.flag_stop = flag_stop
         self.flag_acc_return = flag_acc_return
         self.generate_best_params()
 
@@ -130,8 +133,8 @@ class BestMaStrategy(BestStrategy):
         return get_filter(flag_filter=self.flag_filter, **kwargs)
 
     def _get_variables(self, **kwargs):
-        if self.flag_ts_stop:
-            return create_variables_ts_stop(**kwargs)
+        if self.flag_stop:
+            return create_variables_with_stop(flag_stop=self.flag_stop, **kwargs)
         return create_variables(**kwargs)
 
     def _get_grid_search(self):
@@ -190,12 +193,26 @@ class BestMaStrategy(BestStrategy):
         return self.get_best_params(total_best_params)
 
     def apply_best_params(self, best_params, symbol):
-        if self.flag_ts_stop:
+        if self.flag_stop == 'ts_stop':
             variables = self._get_variables(
                 name=best_params['name'],
                 n1=best_params['n1'],
                 n2=best_params['n2'],
-                ts_stop=best_params['ohlcstx_sl_stop']
+                ts_stop=best_params.get('ohlcstx_sl_stop')
+            )
+        elif self.flag_stop == 'sl_stop':
+            variables = self._get_variables(
+                name=best_params['name'],
+                n1=best_params['n1'],
+                n2=best_params['n2'],
+                sl_stop=best_params.get('ohlcstx_sl_stop')
+            )
+        elif self.flag_stop == 'tp_stop':
+            variables = self._get_variables(
+                name=best_params['name'],
+                n1=best_params['n1'],
+                n2=best_params['n2'],
+                tp_stop=best_params.get('ohlcstx_tp_stop')
             )
         else:
             variables = self._get_variables(
@@ -208,8 +225,8 @@ class BestMaStrategy(BestStrategy):
             threshold=best_params.get('ang_threshold')
             )
         filename = f"{symbol}-{self.freq}-{best_params['name']}-{best_params['n1']}-{best_params['n2']}-"
-        if self.flag_ts_stop:
-            filename += f'''ts-{best_params['ohlcstx_sl_stop']:.2f}-'''
+        if self.flag_stop:
+            filename += f'''{self.flag_stop}-{best_params.get('ohlcstx_sl_stop') or best_params.get('ohlcstx_tp_stop'):.2f}-'''
         if self.flag_filter == 'mmi':
             filename += f"{self.flag_filter}-{best_params['mmi_timeperiod']}-{self.date_str}.pkl"
         elif self.flag_filter == 'ang':
@@ -242,26 +259,27 @@ class CheckMaIndicators(CheckIndicators):
     symbols: a list of symbols to be optimzied on, e.g., ['BTCUSDT']
     date: the date the best params are created
     res_dir: the output directory
-    name: the name of the MA strategy
-    flag_fitler: currently supported fitlers: 'mmi', 'ang', default: None
+    flag_filter: currently supported fitlers: 'mmi', 'ang', default: None
+    flag_stop: flag to specify early stop, currently support 'ts_stop', 'sl_stop', 'tp_stop', default None
     '''
     def __init__(self,
                  symbols: list,
                  date: str,
                  res_dir: str,
                  flag_filter: str = None,
-                 flag_ts_stop: bool = False,
+                 flag_stop: str = None,
                  strategy: str = 'ma'
                  ):
         super().__init__(symbols, date, res_dir, flag_filter, strategy)
+        self.flag_stop = flag_stop
         self.check_indicators()
 
     def _get_strategy(self, strategy):
         return trend_strategy
 
     def _get_variables(self, **kwargs):
-        if self.flag_ts_stop:
-            return create_variables_ts_stop(**kwargs)
+        if self.flag_stop:
+            return create_variables_with_stop(flag_stop=self.flag_stop, **kwargs)
         return create_variables(**kwargs)
 
     def _get_filter(self, **kwargs):
@@ -276,7 +294,8 @@ class InspectMaStrategy(InspectStrategy):
     name, n1, n2: the name and the params of the ma strategy, e.g., 'sma', 100, 50
     timeperiod: param used in either mmi or ang filter
     threshold: param used in ang filter
-    flag_fitler: currently supported fitlers: 'mmi', 'ang', default: None
+    flag_filter: currently supported fitlers: 'mmi', 'ang', default: None
+    flag_stop: flag to specify early stop, currently support 'ts_stop', 'sl_stop', 'tp_stop', default None
     '''
     def __init__(self,
                  symbol: str, freq: str,
@@ -284,8 +303,10 @@ class InspectMaStrategy(InspectStrategy):
                  timeperiod: int = None,
                  threshold: int = None,
                  flag_filter: str = None,
-                 flag_ts_stop: bool = False,
-                 ts_stop: int = None,
+                 flag_stop: bool = False,
+                 ts_stop: float = None,
+                 sl_stop: float = None,
+                 tp_stop: float = None,
                  strategy: str = 'ma',
                  show_fig: bool = True
                  ):
@@ -296,20 +317,39 @@ class InspectMaStrategy(InspectStrategy):
         self.timeperiod = timeperiod
         self.threshold = threshold
         self.flag_filter = flag_filter
-        self.flag_ts_stop = flag_ts_stop
+        self.flag_stop = flag_stop
         self.ts_stop = ts_stop
+        self.sl_stop = sl_stop
+        self.tp_stop = tp_stop
         self.inspect()
 
     def _get_strategy(self, strategy):
         return trend_strategy
 
     def _get_variables(self):
-        if self.flag_ts_stop:
-            return create_variables_ts_stop(
+        if self.flag_stop == 'ts_stop':
+            return create_variables_with_stop(
+                flag_stop=self.flag_stop,
                 name=self.name,
                 n1=self.n1,
                 n2=self.n2,
                 ts_stop=self.ts_stop
+            )
+        if self.flag_stop == 'sl_stop':
+            return create_variables_with_stop(
+                flag_stop=self.flag_stop,
+                name=self.name,
+                n1=self.n1,
+                n2=self.n2,
+                sl_stop=self.sl_stop
+            )
+        if self.flag_stop == 'tp_stop':
+            return create_variables_with_stop(
+                flag_stop=self.flag_stop,
+                name=self.name,
+                n1=self.n1,
+                n2=self.n2,
+                tp_stop=self.tp_stop
             )
         return create_variables(
             name=self.name,
