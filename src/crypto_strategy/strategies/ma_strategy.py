@@ -11,7 +11,7 @@ from .base import (
     trend_strategy,
     mmi_filter, ang_filter,
     BestStrategy, InspectStrategy, CheckIndicators
-)
+) 
 
 
 RANGE_WINDOW = np.arange(30, 300, 10)
@@ -88,6 +88,7 @@ def create_variables(**kwargs):
 def create_variables_with_stop(**kwargs):
     variables = create_variables(**kwargs)
     if not (kwargs.get('n1') or kwargs.get('n2')):
+        flag_stop = kwargs.get('flag_stop')
         if kwargs.get('flag_stop'):
             if not set(flag_stop).issubset(['ts_stop', 'sl_stop', 'tp_stop']):
                 raise ValueError('The value of flag_stop is not supported')
@@ -98,6 +99,8 @@ def create_variables_with_stop(**kwargs):
     return variables
 
 
+# TODO:
+symbols: Union[str, list]
 class BestMaStrategy(BestStrategy):
     '''
     This class provides the method to optimize the MA strategy
@@ -272,6 +275,7 @@ class CheckMaIndicators(CheckIndicators):
         return get_filter(flag_filter=self.flag_filter, **kwargs)
 
 
+# TODO: dictionary for filters
 class InspectMaStrategy(InspectStrategy):
     '''
     This class provides a method to inspect the MA strategy with given params
