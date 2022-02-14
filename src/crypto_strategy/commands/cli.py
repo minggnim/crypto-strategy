@@ -60,7 +60,7 @@ def check_ma_indicators(symbol, date, res_dir, flag_filter, flag_stop):
         symbols = [symbol]
     else:
         symbols = SYMBOLS
-    CheckMaIndicators(symbols, date, res_dir, flag_filter, flag_ts_stop)
+    CheckMaIndicators(symbols, date, res_dir, flag_filter, flag_stop)
 
 
 @cli.command()
