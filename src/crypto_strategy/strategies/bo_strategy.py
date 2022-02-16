@@ -1,4 +1,5 @@
 import os
+from typing import Union
 import numpy as np
 import pandas as pd
 from crypto_strategy.data import (

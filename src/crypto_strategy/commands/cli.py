@@ -35,10 +35,7 @@ def best_ma_strategy(symbol, freq, res_dir, flag_filter, flag_stop):
         raise ValueError('Mismatch found in filter setting and output dir')
     if flag_stop and 'stop' not in res_dir:
         raise ValueError('Mismatch found in flag_stop setting and output dir')
-    if symbol:
-        symbols = [symbol]
-    else:
-        symbols = SYMBOLS
+    symbols = symbol if symbol else SYMBOLS
     BestMaStrategy(symbols, freq, res_dir, flag_filter, flag_stop)
 
 
@@ -56,10 +53,7 @@ def check_ma_indicators(symbol, date, res_dir, flag_filter, flag_stop):
         raise ValueError('Make sure the res_dir is for MA strategy')
     if flag_stop and 'stop' not in res_dir:
         raise ValueError('Mismatch found in flag_stop setting and output dir')
-    if symbol:
-        symbols = [symbol]
-    else:
-        symbols = SYMBOLS
+    symbols = symbol if symbol else SYMBOLS
     CheckMaIndicators(symbols, date, res_dir, flag_filter, flag_stop)
 
 
@@ -79,10 +73,7 @@ def best_bo_strategy(symbol, freq, res_dir, flag_filter, flag_ts_stop):
         raise ValueError('Mismatch found in strategy bo and output dir')
     if flag_ts_stop and 'ts_stop' not in parts:
         raise ValueError('Mismatch found in ts_stop setting and output dir')
-    if symbol:
-        symbols = [symbol]
-    else:
-        symbols = SYMBOLS
+    symbols = symbol if symbol else SYMBOLS
     BestBoStrategy(symbols, freq, res_dir, flag_filter, flag_ts_stop)
 
 
@@ -100,10 +91,7 @@ def check_bo_indicators(symbol, date, res_dir, flag_filter, flag_ts_stop):
         raise ValueError('Mismatch found in strategy bo and output dir')
     if flag_ts_stop and 'ts_stop' not in parts:
         raise ValueError('Mismatch found in ts_stop setting and output dir')
-    if symbol:
-        symbols = [symbol]
-    else:
-        symbols = SYMBOLS
+    symbols = symbol if symbol else SYMBOLS
     CheckBoIndicators(symbols, date, res_dir, flag_filter, flag_ts_stop)
 
 

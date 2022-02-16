@@ -110,7 +110,10 @@ class BestMaStrategy(BestStrategy):
     trends: a list of MA strategies, default: trends.keys()
     strategy: strategy name, default: 'ma'
     '''
-    def __init__(self, symbols: list, freq: str, res_dir: str,
+    def __init__(self,
+                 symbols: Union[str, list],
+                 freq: str,
+                 res_dir: str,
                  flag_filter: str = None,
                  flag_stop: Union[str, list] = None,
                  flag_acc_return: bool = True,
@@ -250,7 +253,7 @@ class CheckMaIndicators(CheckIndicators):
     flag_stop: flag to specify early stop, currently support 'ts_stop', 'sl_stop', 'tp_stop', default None
     '''
     def __init__(self,
-                 symbols: list,
+                 symbols: Union[str, list],
                  date: str,
                  res_dir: str,
                  flag_filter: str = None,
