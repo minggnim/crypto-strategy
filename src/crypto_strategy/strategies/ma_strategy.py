@@ -99,12 +99,10 @@ def create_variables_with_stop(**kwargs):
     return variables
 
 
-# TODO:
-symbols: Union[str, list]
 class BestMaStrategy(BestStrategy):
     '''
     This class provides the method to optimize the MA strategy
-    symbols: a list of symbols to be optimzied on, e.g., ['BTCUSDT']
+    symbols: a single symbol or a list of symbols to be optimzied on, e.g., 'BTCUSDT'
     freq: currently supported values are '1h' or '4h'
     res_dir: the output directory
     flag_filter: flag to specify filters, currently support 'mmi', 'ang', default None

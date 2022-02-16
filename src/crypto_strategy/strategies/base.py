@@ -1,5 +1,6 @@
 import os
 import pathlib
+from typing import Union
 from datetime import datetime
 from abc import ABC, abstractmethod
 import talib
@@ -165,9 +166,14 @@ def sma_filter(ohlcv):
 
 
 class BestStrategy(ABC):
-    def __init__(self, symbols: list, freq: list, res_dir: str, flag_filter: str, strategy: str):
+    def __init__(self, 
+                 symbols: Union[str, list], 
+                 freq: list, 
+                 res_dir: str, 
+                 flag_filter: str, 
+                 strategy: str):
         self._sanity_check(flag_filter, res_dir)
-        self.symbols = symbols
+        self.symbols = [symbols] if isinstance(symbols, str) else symbols
         self.freq = freq
         self.flag_filter = flag_filter
         self.strategy_name = strategy
@@ -231,13 +237,13 @@ class BestStrategy(ABC):
 
 class CheckIndicators(ABC):
     def __init__(self,
-                 symbols: list,
+                 symbols: Union[str, list],
                  date: str,
                  res_dir: str,
                  flag_filter: str,
                  strategy: str,
                  show_fig: bool = False):
-        self.symbols = symbols
+        self.symbols = [symbols] if isinstance(symbols, str) else symbols
         self.date = date
         self.flag_filter = flag_filter
         self.res_dir = os.path.join(res_dir, date.replace('-', ''))
