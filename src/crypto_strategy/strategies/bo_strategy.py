@@ -88,36 +88,28 @@ def create_bo_variables(**kwargs):
     if kwargs:
         assert kwargs.get('long_window') and kwargs.get('short_window'), \
             'BO strategy doesn\'t have config params provided'
-        variables = dict(
-            long_window=kwargs['long_window'],
-            short_window=kwargs['short_window']
-            )
+        variables = kwargs
     else:
-        variables = dict(
-            long_window=RANGE_WINDOW,
-            short_window=RANGE_WINDOW
-        )
+        variables['long_window'] = RANGE_WINDOW
+        variables['short_window'] = RANGE_WINDOW
     return variables
 
 
 def create_bo_variables_ts_stop(**kwargs):
-    if kwargs:
-        assert kwargs.get('long_window') and kwargs.get('short_window') and kwargs.get('ts_stop'),\
-            'BO strategy doesn\'t have config params provided'
-        variables = dict(
-            long_window=kwargs['long_window'],
-            short_window=kwargs['short_window'],
-            ts_stop=kwargs['ts_stop']
-        )
-    else:
-        variables = dict(
-            long_window=RANGE_WINDOW,
-            short_window=RANGE_WINDOW,
-            ts_stop=RANGE_TS_STOP
-        )
+    variables = create_bo_variables(**kwargs)
+    if not (kwargs.get('long_window') or kwargs.get('short_window')):
+        flag_stop = kwargs.get('flag_stop')
+        if kwargs.get('flag_stop'):
+            if not set(flag_stop).issubset(['ts_stop', 'sl_stop', 'tp_stop']):
+                raise ValueError('The value of flag_stop is not supported')
+            for fs in flag_stop:
+                variables[fs] = RANGE_STOP
+        else:
+            raise ValueError('flag_stop is not set')
     return variables
 
 
+# TODO: REPLACE flag_ts_stop by stop_var
 class BestBoStrategy(BestStrategy):
     '''
     This class provides the method to optimize the BO strategy
@@ -256,6 +248,7 @@ class BestBoStrategy(BestStrategy):
         print('The search for all the symbols is completed')
 
 
+# TODO: REPLACE flag_ts_stop by stop_var
 class CheckBoIndicators(CheckIndicators):
     '''
     This class provides the method to check Partial Differentiation
@@ -291,6 +284,7 @@ class CheckBoIndicators(CheckIndicators):
         return get_filter(flag_filter=self.flag_filter, **kwargs)
 
 
+# TODO: REPLACE flag_ts_stop by stop_var
 class InspectBoStrategy(InspectStrategy):
     '''
     This class provides the method to optimize the BO strategy
