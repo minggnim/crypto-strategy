@@ -5,7 +5,7 @@ import vectorbt as vbt
 from finlab_crypto.utility import (
     stop_early,
     enumerate_variables,
-    migrate_trailing_stop
+    migrate_stop_vars
 )
 
 
@@ -39,7 +39,7 @@ def stop_vars():
 def transform_stop_vars(stop_vars):
     stop_vars = enumerate_variables(stop_vars)
     stop_vars = {key: [stop_vars[i][key] for i in range(len(stop_vars))] for key in stop_vars[0].keys()}
-    stop_vars = migrate_trailing_stop(stop_vars)
+    stop_vars = migrate_stop_vars(stop_vars)
     return stop_vars
 
 

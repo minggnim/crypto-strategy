@@ -36,7 +36,7 @@ pip install crypto-strategy[full]
 - Example: Find the best params using 1h data with mmi filter and ts_stop
     ```
     BestMaStrategy(
-        symbols=symbols, 
+        symbols=['BTCUSDT', 'ETHUSDT'], 
         freq='1h', 
         res_dir='results/best-1h-ma-mmi-filter', 
         flag_filters='mmi',
@@ -47,7 +47,7 @@ pip install crypto-strategy[full]
 
 2. Breakout Strategy
     - Description: A method to optimize the BO strategy
-        - symbols: a list of symbols to be optimzied on, e.g., ['BTCUSDT']
+        - symbols: a list of symbols to be optimzied on, e.g., 'BTCUSDT'
         - freq: currently supported values: '1h' or '4h'
         - res_dir: the output directory
         - flag_filter: currently supported filters: 'vol', 'ang', default: None
@@ -56,7 +56,7 @@ pip install crypto-strategy[full]
     - Example: Find the best params for bo strategy with vol filter using BTCUSDT 4h data
         ```
         BestBoStrategy(
-            symbols = ['BTCUSDT'],
+            symbols = 'BTCUSDT',
             freq = '4h', 
             res_dir = 'results/best-4h-bo_rev-vol-filter', 
             flag_filters = 'vol',
