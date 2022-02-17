@@ -1,4 +1,5 @@
 import os
+from typing import Union
 import numpy as np
 import pandas as pd
 from crypto_strategy.data import (
@@ -128,7 +129,10 @@ class BestBoStrategy(BestStrategy):
     flag_ts_stop: flag to turn on/off trailing stop
     strategy: 'bo'
     '''
-    def __init__(self, symbols: list, freq: str, res_dir: str,
+    def __init__(self, 
+                 symbols: Union[str,list], 
+                 freq: str, 
+                 res_dir: str,
                  flag_filter: str = None,
                  flag_ts_stop: bool = False,
                  flag_acc_return: bool = True,
@@ -268,7 +272,7 @@ class CheckBoIndicators(CheckIndicators):
     strategy: currently supported values: 'bo'
     '''
     def __init__(self,
-                 symbols: list,
+                 symbols: Union[str,list],
                  date: str,
                  res_dir: str,
                  flag_filter: str = None,
@@ -366,10 +370,5 @@ def returns_timeline(
         show_fig=False
     )
     daily_returns = ins.portfolio.daily_returns()
-    acc_returns = {
-        'Ret [:21-04-14]': (daily_returns[:'2021-04-15'] + 1).cumprod()[-1],
-        'Ret [21-04-15:21-07-20]': (daily_returns['2021-04-15':'2021-07-21'] + 1).cumprod()[-1],
-        'Ret [21-07-21:21-11-10]': (daily_returns['2021-07-21':'2021-11-11'] + 1).cumprod()[-1],
-        'Ret [21-11-11:]': (daily_returns['2021-11-11':] + 1).cumprod()[-1]
-    }
+    acc_returns = get_acc_returns(daily_returns) 
     return acc_returns

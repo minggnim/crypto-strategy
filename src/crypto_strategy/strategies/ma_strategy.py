@@ -99,12 +99,10 @@ def create_variables_with_stop(**kwargs):
     return variables
 
 
-# TODO:
-symbols: Union[str, list]
 class BestMaStrategy(BestStrategy):
     '''
     This class provides the method to optimize the MA strategy
-    symbols: a list of symbols to be optimzied on, e.g., ['BTCUSDT']
+    symbols: a single symbol or a list of symbols to be optimzied on, e.g., 'BTCUSDT'
     freq: currently supported values are '1h' or '4h'
     res_dir: the output directory
     flag_filter: flag to specify filters, currently support 'mmi', 'ang', default None
@@ -112,7 +110,10 @@ class BestMaStrategy(BestStrategy):
     trends: a list of MA strategies, default: trends.keys()
     strategy: strategy name, default: 'ma'
     '''
-    def __init__(self, symbols: list, freq: str, res_dir: str,
+    def __init__(self,
+                 symbols: Union[str, list],
+                 freq: str,
+                 res_dir: str,
                  flag_filter: str = None,
                  flag_stop: Union[str, list] = None,
                  flag_acc_return: bool = True,
@@ -252,7 +253,7 @@ class CheckMaIndicators(CheckIndicators):
     flag_stop: flag to specify early stop, currently support 'ts_stop', 'sl_stop', 'tp_stop', default None
     '''
     def __init__(self,
-                 symbols: list,
+                 symbols: Union[str, list],
                  date: str,
                  res_dir: str,
                  flag_filter: str = None,
