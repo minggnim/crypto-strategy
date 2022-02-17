@@ -373,10 +373,5 @@ def returns_timeline(
         show_fig=False
     )
     daily_returns = ins.portfolio.daily_returns()
-    acc_returns = {
-        'Ret [:21-04-14]': (daily_returns[:'2021-04-15'] + 1).cumprod()[-1],
-        'Ret [21-04-15:21-07-20]': (daily_returns['2021-04-15':'2021-07-21'] + 1).cumprod()[-1],
-        'Ret [21-07-21:21-11-10]': (daily_returns['2021-07-21':'2021-11-11'] + 1).cumprod()[-1],
-        'Ret [21-11-11:]': (daily_returns['2021-11-11':] + 1).cumprod()[-1]
-    }
+    acc_returns = get_acc_returns(daily_returns) 
     return acc_returns
