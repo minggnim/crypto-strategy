@@ -68,7 +68,7 @@ def get_filter(flag_filter, **kwargs):
     return filters
 
 
-def create_variables(**kwargs):
+def create_ma_variables(**kwargs):
     if kwargs.get('name'):
         variables = dict(name=kwargs.get('name'))
     else:
@@ -85,8 +85,8 @@ def create_variables(**kwargs):
     return variables
 
 
-def create_variables_with_stop(**kwargs):
-    variables = create_variables(**kwargs)
+def create_ma_variables_with_stop(**kwargs):
+    variables = create_ma_variables(**kwargs)
     if not (kwargs.get('n1') or kwargs.get('n2')):
         flag_stop = kwargs.get('flag_stop')
         if kwargs.get('flag_stop'):
@@ -99,8 +99,6 @@ def create_variables_with_stop(**kwargs):
     return variables
 
 
-# TODO:
-symbols: Union[str, list]
 class BestMaStrategy(BestStrategy):
     '''
     This class provides the method to optimize the MA strategy
@@ -112,7 +110,10 @@ class BestMaStrategy(BestStrategy):
     trends: a list of MA strategies, default: trends.keys()
     strategy: strategy name, default: 'ma'
     '''
-    def __init__(self, symbols: list, freq: str, res_dir: str,
+    def __init__(self,
+                 symbols: list,
+                 freq: str,
+                 res_dir: str,
                  flag_filter: str = None,
                  flag_stop: Union[str, list] = None,
                  flag_acc_return: bool = True,
@@ -133,8 +134,8 @@ class BestMaStrategy(BestStrategy):
 
     def _get_variables(self, **kwargs):
         if self.flag_stop:
-            return create_variables_with_stop(flag_stop=self.flag_stop, **kwargs)
-        return create_variables(**kwargs)
+            return create_ma_variables_with_stop(flag_stop=self.flag_stop, **kwargs)
+        return create_ma_variables(**kwargs)
 
     def _get_grid_search(self):
         if self.flag_filter == 'mmi':
@@ -268,8 +269,8 @@ class CheckMaIndicators(CheckIndicators):
 
     def _get_variables(self, **kwargs):
         if self.flag_stop:
-            return create_variables_with_stop(flag_stop=self.flag_stop, **kwargs)
-        return create_variables(**kwargs)
+            return create_ma_variables_with_stop(flag_stop=self.flag_stop, **kwargs)
+        return create_ma_variables(**kwargs)
 
     def _get_filter(self, **kwargs):
         return get_filter(flag_filter=self.flag_filter, **kwargs)
@@ -311,7 +312,7 @@ class InspectMaStrategy(InspectStrategy):
         return trend_strategy
 
     def _get_variables(self):
-        variables = create_variables(name=self.name, n1=self.n1, n2=self.n2)
+        variables = create_ma_variables(name=self.name, n1=self.n1, n2=self.n2)
         if self.stop_vars:
             variables.update(self.stop_vars)
         return variables

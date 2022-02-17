@@ -1,4 +1,5 @@
 import os
+from typing import Union
 import numpy as np
 import pandas as pd
 from crypto_strategy.data import (
@@ -95,7 +96,7 @@ def create_bo_variables(**kwargs):
     return variables
 
 
-def create_bo_variables_ts_stop(**kwargs):
+def create_bo_variables_with_stop(**kwargs):
     variables = create_bo_variables(**kwargs)
     if not (kwargs.get('long_window') or kwargs.get('short_window')):
         flag_stop = kwargs.get('flag_stop')
@@ -109,7 +110,6 @@ def create_bo_variables_ts_stop(**kwargs):
     return variables
 
 
-# TODO: REPLACE flag_ts_stop by stop_var
 class BestBoStrategy(BestStrategy):
     '''
     This class provides the method to optimize the BO strategy
@@ -120,14 +120,17 @@ class BestBoStrategy(BestStrategy):
     flag_ts_stop: flag to turn on/off trailing stop
     strategy: 'bo'
     '''
-    def __init__(self, symbols: list, freq: str, res_dir: str,
+    def __init__(self,
+                 symbols: Union[str, list],
+                 freq: str,
+                 res_dir: str,
                  flag_filter: str = None,
-                 flag_ts_stop: bool = False,
+                 flag_stop: Union[str, list] = None,
                  flag_acc_return: bool = True,
                  strategy: str = 'bo',
                  ):
         super().__init__(symbols, freq, res_dir, flag_filter, strategy)
-        self.flag_ts_stop = flag_ts_stop
+        self.flag_stop = [flag_stop] if isinstance(flag_stop, str) else flag_stop
         self.flag_acc_return = flag_acc_return
         self.generate_best_params()
 
@@ -138,8 +141,8 @@ class BestBoStrategy(BestStrategy):
         return get_filter(flag_filter=self.flag_filter, **kwargs)
 
     def _get_variables(self, **kwargs):
-        if self.flag_ts_stop:
-            return create_bo_variables_ts_stop(**kwargs)
+        if self.flag_stop:
+            return create_bo_variables_with_stop(flag_stop=self.flag_stop, **kwargs)
         return create_bo_variables(**kwargs)
 
     def _get_grid_search(self):
@@ -200,25 +203,29 @@ class BestBoStrategy(BestStrategy):
         return self.get_best_params(total_best_params)
 
     def apply_best_params(self, best_params, symbol):
-        if self.flag_ts_stop:
-            variables = self._get_variables(
-                long_window=best_params['long_window'],
-                short_window=best_params['short_window'],
-                ts_stop=best_params['ohlcstx_sl_stop']
-            )
-        else:
-            variables = self._get_variables(
-                long_window=best_params['long_window'],
-                short_window=best_params['short_window']
-            )
+        variables = self._get_variables(
+            long_window=best_params['long_window'],
+            short_window=best_params['short_window']
+        )
+        if 'ts_stop' in self.flag_stop:
+            variables.update(ts_stop=best_params.get('ohlcstx_sl_stop'))
+        if 'sl_stop' in self.flag_stop:
+            variables.update(sl_stop=best_params.get('ohlcstx_sl_stop'))
+        if 'tp_stop' in self.flag_stop:
+            variables.update(tp_stop=best_params.get('ohlcstx_tp_stop'))
         filters = self._get_filter(
             timeperiod=best_params.get('vol_timeperiod') if best_params.get('vol_timeperiod') else best_params.get('ang_timeperiod'),
             multiplier=best_params.get('vol_multiplier'),
             threshold=best_params.get('ang_threshold')
             )
         filename = f'''{symbol}-{self.freq}-{self.strategy_name}-{best_params['long_window']}-{best_params['short_window']}-'''
-        if self.flag_ts_stop:
-            filename += f'''ts-{best_params['ohlcstx_sl_stop']:.2f}-'''
+        if self.flag_stop:
+            if 'sl_stop' in self.flag_stop:
+                filename += f"sl_stop-{best_params.get('ohlcstx_sl_stop'):.2f}-"
+            if 'ts_stop' in self.flag_stop:
+                filename += f"ts_stop-{best_params.get('ohlcstx_sl_stop'):.2f}-"
+            if 'tp_stop' in self.flag_stop:
+                filename += f"tp_stop-{best_params.get('ohlcstx_tp_stop'):.2f}-"
         if self.flag_filter == 'vol':
             filename += f'''{self.flag_filter}-{best_params['vol_timeperiod']}-{best_params['vol_multiplier']}-{self.date_str}.pkl'''
         elif self.flag_filter == 'ang':
@@ -248,7 +255,6 @@ class BestBoStrategy(BestStrategy):
         print('The search for all the symbols is completed')
 
 
-# TODO: REPLACE flag_ts_stop by stop_var
 class CheckBoIndicators(CheckIndicators):
     '''
     This class provides the method to check Partial Differentiation
@@ -261,30 +267,29 @@ class CheckBoIndicators(CheckIndicators):
     strategy: currently supported values: 'bo'
     '''
     def __init__(self,
-                 symbols: list,
+                 symbols: Union[str, list],
                  date: str,
                  res_dir: str,
                  flag_filter: str = None,
-                 flag_ts_stop: bool = False,
+                 flag_stop: Union[str, list] = None,
                  strategy: str = 'bo'
                  ):
         super().__init__(symbols, date, res_dir, flag_filter, strategy)
-        self.flag_ts_stop = flag_ts_stop
+        self.flag_stop = [flag_stop] if isinstance(flag_stop, str) else flag_stop
         self.check_indicators()
 
     def _get_strategy(self, strategy):
         return get_strategy(strategy)
 
     def _get_variables(self, **kwargs):
-        if self.flag_ts_stop:
-            return create_bo_variables_ts_stop(**kwargs)
+        if self.flag_stop:
+            return create_bo_variables_with_stop(flag_stop=self.flag_stop, **kwargs)
         return create_bo_variables(**kwargs)
 
     def _get_filter(self, **kwargs):
         return get_filter(flag_filter=self.flag_filter, **kwargs)
 
 
-# TODO: REPLACE flag_ts_stop by stop_var
 class InspectBoStrategy(InspectStrategy):
     '''
     This class provides the method to optimize the BO strategy
@@ -297,11 +302,19 @@ class InspectBoStrategy(InspectStrategy):
     ts_stop: ts_stop params
     strategy: currently supports 'bo'
     '''
-    def __init__(self, symbol: str, freq: str,
-                 long_window: int, short_window: int, ts_stop: int = None,
-                 timeperiod: int = None, multiplier: int = None, threshold: int = None,
-                 flag_filter: str = None, flag_ts_stop: bool = False,
-                 strategy: str = 'bo', show_fig: bool = True
+    def __init__(self, 
+                 symbol: str,
+                 freq: str,
+                 long_window: int,
+                 short_window: int,
+                 ts_stop: int = None,
+                 timeperiod: int = None,
+                 multiplier: int = None,
+                 threshold: int = None,
+                 flag_filter: str = None,
+                 flag_ts_stop: bool = False,
+                 strategy: str = 'bo',
+                 show_fig: bool = True
                  ):
         super().__init__(symbol, freq, flag_filter, strategy, show_fig)
         self.long_window = long_window
