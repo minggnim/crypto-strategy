@@ -294,11 +294,13 @@ class CheckBoIndicators(CheckIndicators):
 class InspectBoStrategy(InspectStrategy):
     '''
     This class provides the method to optimize the BO strategy
-    symbols: a list of symbols to be optimzied on, e.g., ['BTCUSDT']
+    symbols: a list of symbols to be optimzied on, e.g., 'BTCUSDT'
     freq: currently supported values: '1h' or '4h'
     long_window, short_window: breakout params
     timeperiod, multiplier: volume filter params
     flag_filter: currently supported fitlers: 'vol', 'ang', default: None
+    flag_ts_stop: flag to turn on/off trailing stop
+    ts_stop: ts_stop params
     strategy: currently supports 'bo'
     '''
     def __init__(self, symbol: str, freq: str,
