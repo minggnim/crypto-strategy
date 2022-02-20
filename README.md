@@ -51,16 +51,20 @@ pip install crypto-strategy[full]
         - freq: currently supported values: '1h' or '4h'
         - res_dir: the output directory
         - flag_filter: currently supported filters: 'vol', 'ang', default: None
-        - flag_ts_stop: trailing stop filter flag
+        - flag_stop: early stop flag, [ts_stop | sl_stop | tp_stop]
+            - ts_stop: trailing stop
+            - sl_stop: stop loss
+            - tp_stop: take profit
 
-    - Example: Find the best params for bo strategy with vol filter using BTCUSDT 4h data
+
+    - Example: Find the best params for bo strategy with vol filter using BTCUSDT 4h data and sl_stop
         ```
         BestBoStrategy(
             symbols = 'BTCUSDT',
             freq = '4h', 
             res_dir = 'results/best-4h-bo_rev-vol-filter', 
             flag_filters = 'vol',
-            flag_ts_stop = False,
+            flag_stop = 'sl_stop',
         )
 
 
@@ -112,8 +116,7 @@ BestMacdStrategy(symbols, freq, res_dir, flag_filter)
         - flag_filter: currently supported fitlers: 'vol', 'ang', default: None
         - timeperiod, multiplier: volume filter params
         - timeperiod, threshold: angle filter params
-        - flag_ts_stop: flag to turn on/off trailing stop
-        - ts_stop: ts_stop params
+        - stop_vars: dictionary of stop vars, currently support 'ts_stop', 'sl_stop', 'tp_stop', default None
 
     - Example: Inspect 4h BTCUSDT breakout strategy with volume filter and trailing stop
         ```
@@ -122,8 +125,7 @@ BestMacdStrategy(symbols, freq, res_dir, flag_filter)
             freq='4h', 
             long_window=100, short_window=50,
             flag_filter='vol', timeperiod=20, multiplier=2,
-            flag_ts_stop=True,
-            ts_stop=0.1)
+            stop_vars={'ts_stop':0.1})
         ```
 
 

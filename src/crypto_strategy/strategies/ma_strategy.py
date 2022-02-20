@@ -68,7 +68,7 @@ def get_filter(flag_filter, **kwargs):
     return filters
 
 
-def create_variables(**kwargs):
+def create_ma_variables(**kwargs):
     if kwargs.get('name'):
         variables = dict(name=kwargs.get('name'))
     else:
@@ -85,8 +85,8 @@ def create_variables(**kwargs):
     return variables
 
 
-def create_variables_with_stop(**kwargs):
-    variables = create_variables(**kwargs)
+def create_ma_variables_with_stop(**kwargs):
+    variables = create_ma_variables(**kwargs)
     if not (kwargs.get('n1') or kwargs.get('n2')):
         flag_stop = kwargs.get('flag_stop')
         if kwargs.get('flag_stop'):
@@ -134,8 +134,8 @@ class BestMaStrategy(BestStrategy):
 
     def _get_variables(self, **kwargs):
         if self.flag_stop:
-            return create_variables_with_stop(flag_stop=self.flag_stop, **kwargs)
-        return create_variables(**kwargs)
+            return create_ma_variables_with_stop(flag_stop=self.flag_stop, **kwargs)
+        return create_ma_variables(**kwargs)
 
     def _get_grid_search(self):
         if self.flag_filter == 'mmi':
@@ -269,8 +269,8 @@ class CheckMaIndicators(CheckIndicators):
 
     def _get_variables(self, **kwargs):
         if self.flag_stop:
-            return create_variables_with_stop(flag_stop=self.flag_stop, **kwargs)
-        return create_variables(**kwargs)
+            return create_ma_variables_with_stop(flag_stop=self.flag_stop, **kwargs)
+        return create_ma_variables(**kwargs)
 
     def _get_filter(self, **kwargs):
         return get_filter(flag_filter=self.flag_filter, **kwargs)
@@ -289,8 +289,11 @@ class InspectMaStrategy(InspectStrategy):
     stop_vars: dictionary of stop vars, currently support 'ts_stop', 'sl_stop', 'tp_stop', default None
     '''
     def __init__(self,
-                 symbol: str, freq: str,
-                 name: str, n1: int, n2: int,
+                 symbol: str,
+                 freq: str,
+                 name: str,
+                 n1: int,
+                 n2: int,
                  flag_filter: str = None,
                  timeperiod: int = None,
                  threshold: int = None,
@@ -312,7 +315,7 @@ class InspectMaStrategy(InspectStrategy):
         return trend_strategy
 
     def _get_variables(self):
-        variables = create_variables(name=self.name, n1=self.n1, n2=self.n2)
+        variables = create_ma_variables(name=self.name, n1=self.n1, n2=self.n2)
         if self.stop_vars:
             variables.update(self.stop_vars)
         return variables
@@ -323,3 +326,32 @@ class InspectMaStrategy(InspectStrategy):
             timeperiod=self.timeperiod,
             threshold=self.threshold
             )
+
+
+def returns_timeline(
+    symbol: str,
+    freq: str,
+    name: str,
+    n1: int,
+    n2: int,
+    flag_filter: str = None,
+    timeperiod: int = None,
+    threshold: int = None,
+    stop_vars: dict = None,
+    strategy: str = 'ma'
+):
+    ins = InspectMaStrategy(
+        symbol=symbol,
+        freq=freq,
+        n1=n1,
+        n2=n2,
+        timeperiod=timeperiod,
+        threshold=threshold,
+        flag_filter=flag_filter,
+        stop_vars = stop_vars,
+        strategy=strategy,
+        show_fig=False
+    )
+    daily_returns = ins.portfolio.daily_returns()
+    acc_returns = get_acc_returns(daily_returns) 
+    return acc_returns
