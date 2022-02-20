@@ -31,13 +31,28 @@ def exits():
 
 
 @pytest.fixture
-def stop_vars():
+def tp_stop():
+    return {'tp_stop': 0.3}
+
+
+@pytest.fixture
+def ts_stop():
     return {'ts_stop': 0.1}
 
 
 @pytest.fixture
-def transform_stop_vars(stop_vars):
-    stop_vars = enumerate_variables(stop_vars)
+def sl_stop():
+    return {'sl_stop': 0.1}
+
+
+@pytest.fixture
+def combined_stops():
+    return {'sl_stop': 0.1, 'tp_stop': 0.1}
+
+
+@pytest.fixture
+def transform_stop_vars(ts_stop):
+    stop_vars = enumerate_variables(ts_stop)
     stop_vars = {key: [stop_vars[i][key] for i in range(len(stop_vars))] for key in stop_vars[0].keys()}
     stop_vars = migrate_stop_vars(stop_vars)
     return stop_vars
@@ -71,7 +86,26 @@ def test_ohlcstx(entries, price, transform_stop_vars):
         )
 
 
-def test_ts_stop(price, entries, exits, stop_vars):
-    entries_after, exits_after = stop_early(price, entries, exits, stop_vars)
+def test_tp_stop(price, entries, exits, tp_stop):
+    entries_after, exits_after = stop_early(price, entries, exits, tp_stop)
+    assert (entries.values == entries_after.values).all()
+    assert (exits_after.values.squeeze() == [False, False, True, False, False, False]).all()
+
+
+def test_ts_stop(price, entries, exits, ts_stop):
+    entries_after, exits_after = stop_early(price, entries, exits, ts_stop)
     assert (entries.values == entries_after.values).all()
     assert (exits_after.values.squeeze() == [False, False, False, True, False, False]).all()
+
+
+def test_sl_stop(price, entries, exits, sl_stop):
+    entries_after, exits_after = stop_early(price, entries, exits, sl_stop)
+    assert (entries.values == entries_after.values).all()
+    assert (exits_after.values.squeeze() == [False, False, False, False, False, True]).all()
+
+
+# TODO: investigate this
+def test_combined_stops(price, entries, exits, combined_stops):
+    entries_after, exits_after = stop_early(price, entries, exits, combined_stops)
+    assert (entries.values == entries_after.values).all()
+    assert (exits_after.values.squeeze() == [False, True, False, False, False, False]).all()

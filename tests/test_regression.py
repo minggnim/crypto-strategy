@@ -18,9 +18,8 @@ def test_regression_xrp(xrp_positions_prior):
     stats = InspectBoStrategy(
         'XRPUSDT', '4h',
         long_window=100, short_window=15,
-        flag_ts_stop=True, ts_stop=0.1,
+        stop_vars={'ts_stop': 0.1},
         flag_filter='vol', timeperiod=10, multiplier=2, show_fig=False)
-
     positions = stats.portfolio.positions.records_readable
     positions = positions[positions["Entry Timestamp"] < "2021-12-30"]
     np.testing.assert_allclose(positions["Size"].values, xrp_positions_prior["Size"].values)
@@ -31,7 +30,7 @@ def test_regression_btc(btc_positions_prior):
     stats = InspectBoStrategy(
         'BTCUSDT', '4h',
         long_window=165, short_window=50,
-        flag_ts_stop=True, ts_stop=0.15,
+        stop_vars={'ts_stop': 0.15},
         flag_filter='vol', timeperiod=30, multiplier=1, show_fig=False)
     positions = stats.portfolio.positions.records_readable
     positions = positions[positions["Entry Timestamp"] < "2021-12-30"]
