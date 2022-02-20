@@ -366,10 +366,10 @@ def returns_timeline(
         multiplier=multiplier,
         threshold=threshold,
         flag_filter=flag_filter,
-        stop_vars = stop_vars,
+        stop_vars=stop_vars,
         strategy=strategy,
         show_fig=False
     )
     daily_returns = ins.portfolio.daily_returns()
-    acc_returns = get_acc_returns(daily_returns) 
+    acc_returns = get_acc_returns(daily_returns)
     return acc_returns

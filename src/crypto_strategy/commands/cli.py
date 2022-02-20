@@ -62,7 +62,7 @@ def check_ma_indicators(symbol, date, res_dir, flag_filter, flag_stop):
 @click.option('--freq', '-f', required=True, type=click.Choice(['4h', '1h']), help="frquency to use")
 @click.option('--res_dir', '-r', required=True, type=str, help="directory for outputs")
 @click.option('--flag_filter', '-g', type=str, default=None, show_default=True, help='filter to use, vol | ang')
-@click.option('--flag_ts_stop', '-t', is_flag=True, help='ts_stop flag')
+@click.option('--flag_stop', '-t', type=str, default=None, show_default=True, help='early stop flag, ts_stop | sl_stop | tp_stop')
 def best_bo_strategy(symbol, freq, res_dir, flag_filter, flag_ts_stop):
     parts = res_dir.split('-')
     if freq not in parts:
@@ -74,7 +74,7 @@ def best_bo_strategy(symbol, freq, res_dir, flag_filter, flag_ts_stop):
     if flag_ts_stop and 'ts_stop' not in parts:
         raise ValueError('Mismatch found in ts_stop setting and output dir')
     symbols = symbol if symbol else SYMBOLS
-    BestBoStrategy(symbols, freq, res_dir, flag_filter, flag_ts_stop)
+    BestBoStrategy(symbols, freq, res_dir, flag_filter, flag_stop)
 
 
 @cli.command()
@@ -82,8 +82,8 @@ def best_bo_strategy(symbol, freq, res_dir, flag_filter, flag_ts_stop):
 @click.option('--date', '-d', type=str, help='the date when the results are generated')
 @click.option('--res_dir', '-r', required=True, type=str, help="directory for outputs")
 @click.option('--flag_filter', '-g', type=str, default=None, show_default=True, help='filter to use, vol | ang')
-@click.option('--flag_ts_stop', '-t', is_flag=True, help='ts_stop flag')
-def check_bo_indicators(symbol, date, res_dir, flag_filter, flag_ts_stop):
+@click.option('--flag_stop', '-t', type=str, default=None, show_default=True, help='early stop flag, ts_stop | sl_stop | tp_stop')
+def check_bo_indicators(symbol, date, res_dir, flag_filter, flag_stop):
     parts = res_dir.split('-')
     if (flag_filter and flag_filter not in parts) or (not flag_filter and 'filter' in parts):
         raise ValueError('Mismatch found in filter setting and output dir')
@@ -92,7 +92,7 @@ def check_bo_indicators(symbol, date, res_dir, flag_filter, flag_ts_stop):
     if flag_ts_stop and 'ts_stop' not in parts:
         raise ValueError('Mismatch found in ts_stop setting and output dir')
     symbols = symbol if symbol else SYMBOLS
-    CheckBoIndicators(symbols, date, res_dir, flag_filter, flag_ts_stop)
+    CheckBoIndicators(symbols, date, res_dir, flag_filter, flag_stop)
 
 
 @cli.command()

@@ -166,11 +166,11 @@ def sma_filter(ohlcv):
 
 
 class BestStrategy(ABC):
-    def __init__(self, 
-                 symbols: Union[str, list], 
-                 freq: list, 
-                 res_dir: str, 
-                 flag_filter: str, 
+    def __init__(self,
+                 symbols: Union[str, list],
+                 freq: list,
+                 res_dir: str,
+                 flag_filter: str,
                  strategy: str):
         self._sanity_check(flag_filter, res_dir)
         self.symbols = [symbols] if isinstance(symbols, str) else symbols
