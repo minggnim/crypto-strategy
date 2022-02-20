@@ -289,8 +289,11 @@ class InspectMaStrategy(InspectStrategy):
     stop_vars: dictionary of stop vars, currently support 'ts_stop', 'sl_stop', 'tp_stop', default None
     '''
     def __init__(self,
-                 symbol: str, freq: str,
-                 name: str, n1: int, n2: int,
+                 symbol: str,
+                 freq: str,
+                 name: str,
+                 n1: int,
+                 n2: int,
                  flag_filter: str = None,
                  timeperiod: int = None,
                  threshold: int = None,
@@ -323,3 +326,31 @@ class InspectMaStrategy(InspectStrategy):
             timeperiod=self.timeperiod,
             threshold=self.threshold
             )
+
+
+def returns_timeline(
+    symbol: str,
+    freq: str,
+    name: str,
+    n1: int,
+    n2: int,
+    flag_filter: str = None,
+    timeperiod: int = None,
+    threshold: int = None,
+    stop_vars: dict = None
+):
+    ins = InspectMaStrategy(
+        symbol=symbol,
+        freq=freq,
+        n1=n1,
+        n2=n2,
+        timeperiod=timeperiod,
+        threshold=threshold,
+        flag_filter=flag_filter,
+        stop_vars = stop_vars,
+        strategy=strategy,
+        show_fig=False
+    )
+    daily_returns = ins.portfolio.daily_returns()
+    acc_returns = get_acc_returns(daily_returns) 
+    return acc_returns

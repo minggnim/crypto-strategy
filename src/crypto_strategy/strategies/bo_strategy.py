@@ -18,7 +18,7 @@ RANGE_WINDOW = np.arange(10, 200, 5)
 RANGE_TIMEPERIOD = np.arange(5, 55, 5)
 RANGE_MULTIPLIER = np.arange(1, 10, 1)
 RANGE_THRESHOLD = np.arange(0, 60, 5)
-RANGE_TS_STOP = np.arange(0.1, 0.6, 0.05)
+RANGE_STOP = np.arange(0.1, 0.6, 0.05)
 
 
 def create_vol_filter(flag_filter, **kwargs):
@@ -86,13 +86,14 @@ def get_strategy(strategy):
 
 
 def create_bo_variables(**kwargs):
-    if kwargs:
-        assert kwargs.get('long_window') and kwargs.get('short_window'), \
-            'BO strategy doesn\'t have config params provided'
+    variables = dict()
+    if kwargs.get('long_window') and kwargs.get('short_window'):
         variables = kwargs
-    else:
+    elif not (kwargs.get('long_window') or kwargs.get('short_window')):
         variables['long_window'] = RANGE_WINDOW
         variables['short_window'] = RANGE_WINDOW
+    else:
+        raise ValueError('BO strategy doesn\'t have config params provided')
     return variables
 
 
@@ -237,7 +238,6 @@ class BestBoStrategy(BestStrategy):
         if self.flag_acc_return:
             acc_returns = get_acc_returns(portfolio.daily_returns())
             stats = stats.append(pd.Series(acc_returns))
-        filename = os.path.join(self.output_path, filename)
         save_stats(stats, self.output_path, filename)
         print(f'The stats are saved to {self.output_path}/{filename}')
 
@@ -307,39 +307,34 @@ class InspectBoStrategy(InspectStrategy):
                  freq: str,
                  long_window: int,
                  short_window: int,
-                 ts_stop: int = None,
                  timeperiod: int = None,
                  multiplier: int = None,
                  threshold: int = None,
                  flag_filter: str = None,
-                 flag_ts_stop: bool = False,
+                 stop_vars: dict = None,
                  strategy: str = 'bo',
                  show_fig: bool = True
                  ):
         super().__init__(symbol, freq, flag_filter, strategy, show_fig)
         self.long_window = long_window
         self.short_window = short_window
-        self.multiplier = multiplier
         self.timeperiod = timeperiod
+        self.multiplier = multiplier
         self.threshold = threshold
-        self.flag_ts_stop = flag_ts_stop
-        self.ts_stop = ts_stop
+        self.stop_vars = stop_vars
         self.inspect()
 
     def _get_strategy(self, strategy):
         return get_strategy(strategy)
 
     def _get_variables(self, **kwargs):
-        if self.flag_ts_stop:
-            return create_bo_variables_ts_stop(
-                long_window=self.long_window,
-                short_window=self.short_window,
-                ts_stop=self.ts_stop
-            )
-        return create_bo_variables(
+        variables = create_bo_variables(
             long_window=self.long_window,
             short_window=self.short_window
         )
+        if self.stop_vars:
+            variables.update(self.stop_vars)
+        return variables
 
     def _get_filter(self):
         return get_filter(
@@ -351,24 +346,27 @@ class InspectBoStrategy(InspectStrategy):
 
 
 def returns_timeline(
-    symbol, freq,
-    long_window, short_window,
-    strategy,
-    ts_stop=None,
-    timeperiod=None, multiplier=None, threshold=None, flag_filter=None,
-    flag_ts_stop=False,
+    symbol: str,
+    freq: str,
+    long_window: int,
+    short_window: int,
+    timeperiod: int = None,
+    multiplier: int = None,
+    threshold: int = None,
+    flag_filter: str = None,
+    stop_vars: dict = None,
+    strategy: str = 'bo',
 ):
     ins = InspectBoStrategy(
         symbol=symbol,
         freq=freq,
         long_window=long_window,
         short_window=short_window,
-        ts_stop=ts_stop,
         timeperiod=timeperiod,
         multiplier=multiplier,
         threshold=threshold,
         flag_filter=flag_filter,
-        flag_ts_stop=flag_ts_stop,
+        stop_vars = stop_vars,
         strategy=strategy,
         show_fig=False
     )
