@@ -337,7 +337,8 @@ def returns_timeline(
     flag_filter: str = None,
     timeperiod: int = None,
     threshold: int = None,
-    stop_vars: dict = None
+    stop_vars: dict = None,
+    strategy: str = 'ma'
 ):
     ins = InspectMaStrategy(
         symbol=symbol,
