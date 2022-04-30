@@ -55,12 +55,10 @@ def tm_ma_stats(symbol, tm):
     name = parts[2]
     n1 = int(parts[3])
     n2 = int(parts[4])
+    flag_filter = timeperiod = stop_vars = None
     if 'mmi' in parts or 'mmi_ge' in parts:
-        flag_filter = parts[5]
-        timeperiod = int(parts[6])
-    else:
-        flag_filter = timeperiod = None
-    stop_vars = None
+        flag_filter = parts[-3]
+        timeperiod = int(parts[-2])
     if 'ts' in parts:
         stop_vars = {'ts_stop': parts[6]}
     if 'sl' in parts:
