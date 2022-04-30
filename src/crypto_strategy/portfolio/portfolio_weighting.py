@@ -28,11 +28,11 @@ def tm_bo_stats(symbol, tm):
         timeperiod = int(parts[-3])
         threshold = int(parts[-2])
     if 'ts' in parts:
-        stop_vars = {'ts_stop': int(parts[6])}
+        stop_vars = {'ts_stop': float(parts[6])}
     if 'sl' in parts:
-        stop_vars = {'sl_stop': int(parts[6])}
+        stop_vars = {'sl_stop': float(parts[6])}
     if 'tp' in parts:
-        stop_vars = {'tp_stop': int(parts[6])}
+        stop_vars = {'tp_stop': float(parts[6])}
     ins = InspectBoStrategy(
         symbol,
         freq=freq,
@@ -60,11 +60,11 @@ def tm_ma_stats(symbol, tm):
         flag_filter = parts[-3]
         timeperiod = int(parts[-2])
     if 'ts' in parts:
-        stop_vars = {'ts_stop': int(parts[6])}
+        stop_vars = {'ts_stop': float(parts[6])}
     if 'sl' in parts:
-        stop_vars = {'sl_stop': int(parts[6])}
+        stop_vars = {'sl_stop': float(parts[6])}
     if 'tp' in parts:
-        stop_vars = {'tp_stop': int(parts[6])}
+        stop_vars = {'tp_stop': float(parts[6])}
     ins = InspectMaStrategy(
         symbol,
         freq=freq,
