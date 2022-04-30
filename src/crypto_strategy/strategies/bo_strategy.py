@@ -297,7 +297,6 @@ class InspectBoStrategy(InspectStrategy):
     long_window, short_window: breakout params
     timeperiod, multiplier: volume filter params
     flag_filter: currently supported fitlers: 'vol', 'ang', default: None
-    flag_ts_stop: flag to turn on/off trailing stop
     ts_stop: ts_stop params
     strategy: currently supports 'bo'
     '''
