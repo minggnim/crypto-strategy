@@ -18,7 +18,7 @@ def tm_bo_stats(symbol, tm):
     strategy = parts[2]
     long_window = int(parts[3])
     short_window = int(parts[4])
-    flag_filter = timeperiod = multiplier = threshold = None
+    flag_filter = timeperiod = multiplier = threshold = stop_vars = None
     if 'vol' in parts:
         flag_filter = parts[-4]
         timeperiod = int(parts[-3])
@@ -27,6 +27,12 @@ def tm_bo_stats(symbol, tm):
         flag_filter = parts[-4]
         timeperiod = int(parts[-3])
         threshold = int(parts[-2])
+    if 'ts' in parts:
+        stop_vars = {'ts_stop': parts[6]}
+    if 'sl' in parts:
+        stop_vars = {'sl_stop': parts[6]}
+    if 'tp' in parts:
+        stop_vars = {'tp_stop': parts[6]}
     ins = InspectBoStrategy(
         symbol,
         freq=freq,
@@ -36,6 +42,7 @@ def tm_bo_stats(symbol, tm):
         multiplier=multiplier,
         threshold=threshold,
         flag_filter=flag_filter,
+        stop_vars=stop_vars,
         strategy=strategy,
         show_fig=False
     )
@@ -53,6 +60,13 @@ def tm_ma_stats(symbol, tm):
         timeperiod = int(parts[6])
     else:
         flag_filter = timeperiod = None
+    stop_vars = None
+    if 'ts' in parts:
+        stop_vars = {'ts_stop': parts[6]}
+    if 'sl' in parts:
+        stop_vars = {'sl_stop': parts[6]}
+    if 'tp' in parts:
+        stop_vars = {'tp_stop': parts[6]}
     ins = InspectMaStrategy(
         symbol,
         freq=freq,
@@ -61,6 +75,7 @@ def tm_ma_stats(symbol, tm):
         n2=n2,
         flag_filter=flag_filter,
         timeperiod=timeperiod,
+        stop_vars=stop_vars,
         show_fig=False
     )
     return ins.portfolio
