@@ -14,7 +14,7 @@ jobs:
 
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         python-version: ["3.6", "3.7", "3.8", "3.9", "3.10"]
 
@@ -38,4 +38,4 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=20 --max-line-length=140 --statistics
     - name: Test with pytest
       run: |
-        pytest
+        pytest tests/test_stop_vars.py
