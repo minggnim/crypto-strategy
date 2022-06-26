@@ -23,16 +23,23 @@ parameter tuning and analysis charts.
 ```
 """
 
-from finlab_crypto.utility import (enumerate_variables, enumerate_signal,
-                                   stop_early, plot_combination, plot_strategy,
-                                   variable_visualization, remove_pd_object
-                                   )
-from finlab_crypto.overfitting import CSCV
 import copy
 import vectorbt as vbt
 import pandas as pd
 import matplotlib.pyplot as plt
 from collections.abc import Iterable
+from finlab_crypto.utility import (
+    enumerate_variables, 
+    enumerate_signal,
+    stop_early, 
+    remove_pd_object
+)
+from finlab_crypto.utility import (
+    plot_strategy,
+    plot_combination,
+    variable_visualization
+)
+from finlab_crypto.overfitting import CSCV
 
 
 class Filter(object):
