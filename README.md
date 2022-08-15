@@ -2,9 +2,8 @@
 A repository to perform backtests and create trading strategies for cryptocurrencies.
 
 [![Python package](https://github.com/minggnim/crypto-strategy/actions/workflows/python-package.yml/badge.svg)](https://github.com/minggnim/crypto-strategy/actions/workflows/python-package.yml)
-[![pypi-upload](https://github.com/minggnim/crypto-strategy/actions/workflows/python-publish.yml/badge.svg)](https://github.com/minggnim/crypto-strategy/actions/workflows/python-publish.yml)
 [![Dependency Review](https://github.com/minggnim/crypto-strategy/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/minggnim/crypto-strategy/actions/workflows/dependency-review.yml)
-[![pages-build-deployment](https://github.com/minggnim/crypto-strategy/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/minggnim/crypto-strategy/actions/workflows/pages/pages-build-deployment)
+[![pypi-upload](https://github.com/minggnim/crypto-strategy/actions/workflows/python-publish.yml/badge.svg)](https://github.com/minggnim/crypto-strategy/actions/workflows/python-publish.yml)
 
 ![](./img/algo-trading.png)
 
