@@ -460,13 +460,13 @@ class TradingPortfolio():
                     continue
 
         # assumption: self.default_stable_coin can be the quote asset for all alt-coins
-        transaction_btc = increase_asset_amount.append(decrease_asset_amount)
+        transaction_btc = pd.concat([increase_asset_amount, decrease_asset_amount])
         transaction_btc.index = transaction_btc.index + self.default_stable_coin
 
         if self.default_stable_coin in transaction_btc.index:
             transaction_btc.pop(self.default_stable_coin+self.default_stable_coin)
 
-        transaction_btc = transaction_btc.append(pd.Series(txn_btc))
+        transaction_btc = pd.concat([transaction_btc, pd.Series(txn_btc)])
 
         transaction = transaction_btc.to_frame(name='value_in_btc')
 
