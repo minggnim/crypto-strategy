@@ -466,7 +466,7 @@ class TradingPortfolio():
         if self.default_stable_coin in transaction_btc.index:
             transaction_btc.pop(self.default_stable_coin+self.default_stable_coin)
 
-        transaction_btc = pd.concat([transaction_btc, pd.Series(txn_btc)])
+        transaction_btc = pd.concat([transaction_btc, pd.Series(txn_btc, dtype=float)])
 
         transaction = transaction_btc.to_frame(name='value_in_btc')
 
